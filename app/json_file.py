@@ -30,6 +30,9 @@ def get_the_record_number(file_path, group_name) -> int:
     with open(file_path, 'r') as file:
         data = json.load(file)
 
+    if group_name not in data:
+        return 0
+
     return len(data[group_name])
 
 

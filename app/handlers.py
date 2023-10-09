@@ -48,13 +48,20 @@ async def pozorniki_handler(callback: CallbackQuery, state: FSMContext):
 async def check_history_handler(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     if os.path.exists('shame.json'):
-        await state.update_data(shame_id=0)
-        data = await state.get_data()
-        shame_data = json_file.get_the_shame_data('shame.json', data['group_name'], data['shame_id'])
-        await callback.message.edit_text(text=f'Выбрана группа: {data["group_name"]}\n'
-                                              f'Выбрано действие: история\n\n'
-                                              f'{shame_data}',
-                                         reply_markup=keyboards.check_history)
+        number_of_records = json_file.get_the_record_number('shame.json', data['group_name'])
+        if number_of_records != 0:
+            await state.update_data(shame_id=0)
+            data = await state.get_data()
+            shame_data = json_file.get_the_shame_data('shame.json', data['group_name'], data['shame_id'])
+            await callback.message.edit_text(text=f'Выбрана группа: {data["group_name"]}\n'
+                                                  f'Выбрано действие: история\n\n'
+                                                  f'{shame_data}',
+                                             reply_markup=keyboards.check_history)
+        else:
+            await callback.message.edit_text(text=f'Выбрана группа: {data["group_name"]}\n'
+                                                  f'Выбрано действие: история\n'
+                                                  f'Вы ещё не записали ни одного позора',
+                                             reply_markup=keyboards.go_home)
     else:
         await callback.message.edit_text(text=f'Выбрана группа: {data["group_name"]}\n'
                                               f'Выбрано действие: история\n'
