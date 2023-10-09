@@ -6,8 +6,8 @@ pozorniki = InlineKeyboardButton(text='позорники🥰🥰🥰', callback
 add_shame = InlineKeyboardButton(text='Добавить позор', callback_data='add_shame')
 check_history = InlineKeyboardButton(text='Просмотр истории', callback_data='check_history')
 
-back = InlineKeyboardButton(text='⬅️', callback_data='back')
-forward = InlineKeyboardButton(text='➡️', callback_data='forward')
+back = InlineKeyboardButton(text='<', callback_data='back')
+forward = InlineKeyboardButton(text='>', callback_data='forward')
 
 delete_message = InlineKeyboardButton(text='Удалить сообщение', callback_data='delete_message')
 
