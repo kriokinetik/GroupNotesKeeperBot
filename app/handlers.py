@@ -3,6 +3,7 @@ import os
 
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, ForceReply
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from main import bot
@@ -12,7 +13,7 @@ from app.states import ShameData
 router = Router()
 
 
-@router.message(F.text.in_({'/start', '/shame'}))
+@router.message(Command('start', 'shame'))
 async def bot_call_handler(message: Message, state: FSMContext):
     await state.update_data(message_id=message.message_id)
     await message.reply(text='Выберите группу:',
