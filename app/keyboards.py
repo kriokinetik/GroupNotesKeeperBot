@@ -26,6 +26,13 @@ go_home = InlineKeyboardMarkup(
 check_history = InlineKeyboardMarkup(
     inline_keyboard=[
         [buttons.back, buttons.forward],
-        [buttons.home]
+        [buttons.home],
+        [buttons.delete_record]
+    ]
+)
+
+action_check = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [buttons.positive_check, buttons.negative_check]
     ]
 )
