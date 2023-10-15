@@ -7,7 +7,6 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 import config
-from main import bot
 from app import keyboards, json_file
 from app.states import ShameData
 
@@ -24,8 +23,10 @@ async def is_user_has_insufficient_rights(callback) -> bool:
 
 @router.message(Command('start', 'shame'))
 async def bot_call_handler(message: Message, state: FSMContext):
-    await state.update_data(message_id=message.message_id)
-    await state.update_data(username=message.from_user.username)
+    data = await state.get_data()
+    if data:
+        await state.clear()
+    await state.update_data(start_message=message)
     await message.reply(text='Выберите группу:',
                         reply_markup=keyboards.group_selection)
 
@@ -49,6 +50,9 @@ async def delete_message_handler(callback: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data.startswith('group'))
 async def pozorniki_handler(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    if not data:
+        return
     data = await state.update_data(group_name=callback.data[6:])
     await callback.message.edit_text(text=f'Выбрана группа: {data["group_name"]}\n'
                                           f'Выберите действие:',
@@ -58,6 +62,8 @@ async def pozorniki_handler(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == 'check_history')
 async def check_history_handler(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
+    if not data:
+        return
     if os.path.exists('shame.json'):
         number_of_records = json_file.get_the_record_number('shame.json', data['group_name'])
         if number_of_records != 0:
@@ -83,6 +89,8 @@ async def check_history_handler(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == 'back')
 async def back_history_handler(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
+    if not data:
+        return
     if data['shame_id'] == 0:
         next_id = json_file.get_the_record_number('shame.json', data['group_name']) - 1
         data = await state.update_data(shame_id=next_id)
@@ -99,6 +107,8 @@ async def back_history_handler(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == 'forward')
 async def forward_history_handler(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
+    if not data:
+        return
     last_id = json_file.get_the_record_number('shame.json', data['group_name']) - 1
     if data['shame_id'] == last_id:
         next_id = 0
@@ -143,21 +153,28 @@ async def positive_check_handler(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == 'add_shame')
 async def add_shame_handler(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    await bot.send_message(chat_id=callback.message.chat.id,
-                           text=f'Выбрана группа: {data["group_name"]}\n'
-                                f'Выбрано действие: Добавить позор\n'
-                                f'Опишите ситуацию',
-                           reply_to_message_id=data['message_id'],
-                           reply_markup=ForceReply(selective=True)
-                           )
-    await callback.message.delete()
-    await state.set_state(ShameData.description)
+    if not data:
+        return
+    if 'start_message' in data:
+        await callback.bot.send_message(chat_id=callback.message.chat.id,
+                                        text=f'Выбрана группа: {data["group_name"]}\n'
+                                             f'Выбрано действие: Добавить позор\n'
+                                             f'Опишите ситуацию',
+                                        reply_to_message_id=data['start_message'].message_id,
+                                        reply_markup=ForceReply(selective=True)
+                                        )
+        await callback.message.delete()
+        await state.set_state(ShameData.description)
+    else:
+        await callback.answer('Нет доступа')
 
 
 @router.message(ShameData.description)
 async def description_handler(message: Message, state: FSMContext):
     data = await state.get_data()
-    if (message.reply_to_message is not None) and (message.from_user.id == message.reply_to_message.chat.id):
+    if not data or message.reply_to_message is None:
+        return
+    if data:
         await state.update_data(description=message.text)
         delta = datetime.timedelta(hours=3, minutes=0)
         data = await state.update_data(message_datetime=(message.date + delta).strftime('%d.%m.%y %H:%M'))
@@ -165,5 +182,3 @@ async def description_handler(message: Message, state: FSMContext):
         count = json_file.get_the_record_number('shame.json', data['group_name'])
         await message.reply(text=f'Для {data["group_name"]} добавлен позор №{count} от {data["message_datetime"]}\n\n')
         await state.clear()
-    else:
-        await message.reply(f'У вас недостаточно прав. Ожидание текста от @{data["username"]}')
