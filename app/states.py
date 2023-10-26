@@ -7,3 +7,4 @@ class ShameData(StatesGroup):
     message_datetime = State()
     description = State()
     start_message = State()
+    message_access = State()
