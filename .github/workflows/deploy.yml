@@ -1,0 +1,38 @@
+name: Deployment
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout repository
+        uses: actions/checkout@v3
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      -
+        name: Login to Docker registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.DOCKER_REGISTRY_ADDRESS }}
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+      -
+        name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_REGISTRY_ADDRESS }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Trigger deployment pipeline
+        run: |
+          curl -X POST -H "Authorization: ${{ secrets.DEPLOYMENT_WEBHOOK_AUTHORIZATION }}" -H "Content-Length: 0" "${{ secrets.DEPLOYMENT_WEBHOOK_ADDRESS }}"
