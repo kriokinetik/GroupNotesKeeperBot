@@ -3,7 +3,7 @@ import json
 
 def add_record_to_json(file_path: str, group_name: str, date: str, description: str) -> None:
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf8') as file:
             data = json.load(file)
     except FileNotFoundError:
         data = {}
@@ -18,12 +18,12 @@ def add_record_to_json(file_path: str, group_name: str, date: str, description: 
 
     data[group_name].append(new_record)
 
-    with open(file_path, 'w') as file:
-        json.dump(data, file, indent=4)
+    with open(file_path, 'w', encoding='utf8') as file:
+        json.dump(data, file, indent=4, ensure_ascii=False)
 
 
 def get_the_record_number(file_path, group_name) -> int:
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding='utf8') as file:
         data = json.load(file)
 
     if group_name not in data:
@@ -33,7 +33,7 @@ def get_the_record_number(file_path, group_name) -> int:
 
 
 def get_the_shame_data(file_path, group_name, shame_id) -> str:
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding='utf8') as file:
         data = json.load(file)
 
     id_data = data[group_name][shame_id]
@@ -43,10 +43,10 @@ def get_the_shame_data(file_path, group_name, shame_id) -> str:
 
 
 def delete_the_record(file_path, group_name, shame_id):
-    with open(file_path, 'r') as json_file:
+    with open(file_path, 'r', encoding='utf8') as json_file:
         data = json.load(json_file)
 
     data[group_name].pop(shame_id)
 
-    with open(file_path, 'w') as json_file:
-        json.dump(data, json_file, indent=4)
+    with open(file_path, 'w', encoding='utf8') as json_file:
+        json.dump(data, json_file, indent=4, ensure_ascii=False)
