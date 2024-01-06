@@ -27,7 +27,8 @@ jobs:
         with:
           context: .
           push: true
-          tags: source.arasfon.ru/arasfon/kriokinetik_shame_bot:latest
+          platforms: linux/amd64,linux/arm64
+          tags: source.arasfon.ru/external/kriokinetik_shame_bot:latest
 
   deploy:
     runs-on: ubuntu-latest
