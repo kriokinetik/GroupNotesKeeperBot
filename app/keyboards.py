@@ -1,38 +1,25 @@
-from aiogram.types import InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from app import buttons, json_file
 
-from app import buttons
 
+def get_group_selection_keyboard(file_name: str) -> InlineKeyboardMarkup:
+    groups = json_file.get_the_groups(file_name)
+    buttons = []
+    for name in groups:
+        buttons.append([InlineKeyboardButton(text=name, callback_data=f'group_{name}')])
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    return keyboard
 
-group_selection = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [buttons.bei2202, buttons.pozorniki],
-        [buttons.delete_message]
-    ]
-)
-
-action_selection = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [buttons.add_shame, buttons.check_history],
-        [buttons.home]
-    ]
-)
-
-go_home = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [buttons.home]
-    ]
-)
 
 check_history = InlineKeyboardMarkup(
     inline_keyboard=[
-        [buttons.back, buttons.forward],
-        [buttons.home],
-        [buttons.delete_record]
+        [buttons.prev_record, buttons.next_record],
+        [buttons.go_back]
     ]
 )
 
-action_check = InlineKeyboardMarkup(
+go_back_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
-        [buttons.positive_check, buttons.negative_check]
+        [buttons.go_back]
     ]
 )

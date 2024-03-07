@@ -12,42 +12,61 @@ from app.states import ShameData
 router = Router()
 
 
-@router.message(Command('start', 'shame'))
-async def bot_call_handler(message: Message, state: FSMContext):
+@router.message(Command('start', 'help'))
+async def bot_call_handler(message: Message):
+    await message.reply(text='/add@ShameCounter_Bot — добавить запись\n'
+                             '/history@ShameCounter_Bot — просмотреть историю')
+
+
+@router.message(Command('add'))
+async def add_record_handler(message: Message, state: FSMContext):
     data = await state.get_data()
     if data:
         await state.clear()
     await state.update_data(start_message=message)
-    bot_message = await message.reply(text='Выберите группу:',
-                                      reply_markup=keyboards.group_selection)
+    if json_file.json_load('shame.json') == {}:
+        await message.reply(text='Группы и записи отсутствуют.')
+        await state.clear()
+        return
+    bot_message = await message.reply(text='Выберите группу.',
+                                      reply_markup=keyboards.get_group_selection_keyboard('shame.json'))
+    await state.update_data(message_access=bot_message.message_id, action='add')
+
+
+@router.message(Command('history'))
+async def show_history_handler(message: Message, state: FSMContext, reply_flag: bool = True):
+    data = await state.get_data()
+    if data:
+        await state.clear()
+    await state.update_data(start_message=message)
+    if json_file.json_load('shame.json') == {}:
+        await message.reply(text='Группы и записи отсутствуют.')
+        await state.clear()
+        return
+    if reply_flag:
+        bot_message = await message.reply(text='Выберите группу.',
+                                          reply_markup=keyboards.get_group_selection_keyboard('shame.json'))
+    else:
+        bot_message = await message.answer(text='Выберите группу.',
+                                           reply_to_message_id=message.reply_to_message.message_id,
+                                           reply_markup=keyboards.get_group_selection_keyboard('shame.json'))
+    await state.update_data(message_access=bot_message.message_id, action='history')
+
+
+async def request_a_record(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    bot_message = await callback.bot.send_message(chat_id=callback.message.chat.id,
+                                                  text=f'Группа "{data["group_name"]}".\n\n'
+                                                       f'Опишите ситуацию.',
+                                                  reply_to_message_id=data['start_message'].message_id,
+                                                  reply_markup=ForceReply(selective=True)
+                                                  )
     await state.update_data(message_access=bot_message.message_id)
-
-
-@router.callback_query(filters.CallbackAccess(), F.data == 'home')
-async def home_handler(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_state()
-    if data is not None:
-        await state.set_state(state=None)
-    await callback.message.edit_text(text='Выберите группу:',
-                                     reply_markup=keyboards.group_selection)
-
-
-@router.callback_query(filters.Admin(), F.data == 'delete_message')
-async def delete_message_handler(callback: CallbackQuery, state: FSMContext):
-    await state.clear()
     await callback.message.delete()
+    await state.set_state(ShameData.description)
 
 
-@router.callback_query(filters.CallbackAccess(), F.data.startswith('group'))
-async def pozorniki_handler(callback: CallbackQuery, state: FSMContext):
-    data = await state.update_data(group_name=callback.data[6:])
-    await callback.message.edit_text(text=f'Выбрана группа: {data["group_name"]}\n'
-                                          f'Выберите действие:',
-                                     reply_markup=keyboards.action_selection)
-
-
-@router.callback_query(filters.CallbackAccess(), F.data == 'check_history')
-async def check_history_handler(callback: CallbackQuery, state: FSMContext):
+async def show_history(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     if os.path.exists('shame.json'):
         number_of_records = json_file.get_the_record_number('shame.json', data['group_name'])
@@ -55,40 +74,26 @@ async def check_history_handler(callback: CallbackQuery, state: FSMContext):
             await state.update_data(shame_id=0)
             data = await state.get_data()
             shame_data = json_file.get_the_shame_data('shame.json', data['group_name'], data['shame_id'])
-            await callback.message.edit_text(text=f'Выбрана группа: {data["group_name"]}\n'
-                                                  f'Выбрано действие: Просмотр истории\n\n'
+            await callback.message.edit_text(text=f'Группа "{data["group_name"]}".\n\n'
                                                   f'{shame_data}',
                                              reply_markup=keyboards.check_history)
         else:
-            await callback.message.edit_text(text=f'Выбрана группа: {data["group_name"]}\n'
-                                                  f'Выбрано действие: Просмотр истории\n'
-                                                  f'Вы ещё не записали ни одного позора',
-                                             reply_markup=keyboards.go_home)
-    else:
-        await callback.message.edit_text(text=f'Выбрана группа: {data["group_name"]}\n'
-                                              f'Выбрано действие: Просмотр истории\n'
-                                              f'Вы ещё не записали ни одного позора',
-                                         reply_markup=keyboards.go_home)
+            await callback.message.edit_text(text=f'Группа "{data["group_name"]}".\n\n'
+                                                  f'Записи отсутствуют.',
+                                             reply_markup=keyboards.go_back_keyboard)
 
 
-@router.callback_query(filters.CallbackAccess(), F.data == 'back')
-async def back_history_handler(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    if data['shame_id'] == 0:
-        next_id = json_file.get_the_record_number('shame.json', data['group_name']) - 1
-        data = await state.update_data(shame_id=next_id)
-    else:
-        next_id = data['shame_id'] - 1
-        data = await state.update_data(shame_id=next_id)
-    shame_data = json_file.get_the_shame_data('shame.json', data['group_name'], data['shame_id'])
-    await callback.message.edit_text(text=f'Выбрана группа: {data["group_name"]}\n'
-                                          f'Выбрано действие: Просмотр истории\n\n'
-                                          f'{shame_data}',
-                                     reply_markup=keyboards.check_history)
+@router.callback_query(F.data.startswith('group'), filters.CallbackAccess())
+async def action_handler(callback: CallbackQuery, state: FSMContext):
+    data = await state.update_data(group_name=callback.data[6:])
+    if data['action'] == 'add':
+        await request_a_record(callback, state)
+    elif data['action'] == 'history':
+        await show_history(callback, state)
 
 
-@router.callback_query(filters.CallbackAccess(), F.data == 'forward')
-async def forward_history_handler(callback: CallbackQuery, state: FSMContext):
+@router.callback_query(F.data == 'next_record', filters.CallbackAccess())
+async def next_record_handler(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     last_id = json_file.get_the_record_number('shame.json', data['group_name']) - 1
     if data['shame_id'] == last_id:
@@ -98,54 +103,37 @@ async def forward_history_handler(callback: CallbackQuery, state: FSMContext):
         next_id = data['shame_id'] + 1
         data = await state.update_data(shame_id=next_id)
     shame_data = json_file.get_the_shame_data('shame.json', data['group_name'], data['shame_id'])
-    await callback.message.edit_text(text=f'Выбрана группа: {data["group_name"]}\n'
-                                          f'Выбрано действие: Просмотр истории\n\n'
+    await callback.message.edit_text(text=f'Группа "{data["group_name"]}".\n\n'
                                           f'{shame_data}',
                                      reply_markup=keyboards.check_history)
 
 
-@router.callback_query(filters.Admin(), F.data == 'delete_record')
-async def delete_record_handler(callback: CallbackQuery, state: FSMContext):
+@router.callback_query(F.data == 'prev_record', filters.CallbackAccess())
+async def prev_record_handler(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
+    if data['shame_id'] == 0:
+        next_id = json_file.get_the_record_number('shame.json', data['group_name']) - 1
+        data = await state.update_data(shame_id=next_id)
+    else:
+        next_id = data['shame_id'] - 1
+        data = await state.update_data(shame_id=next_id)
     shame_data = json_file.get_the_shame_data('shame.json', data['group_name'], data['shame_id'])
-    await callback.message.edit_text(text=f'Вы уверены, что хотите удалить запись:\n\n'
+    await callback.message.edit_text(text=f'Группа "{data["group_name"]}".\n\n'
                                           f'{shame_data}',
-                                     reply_markup=keyboards.action_check)
+                                     reply_markup=keyboards.check_history)
 
 
-@router.callback_query(filters.Admin(), F.data == 'positive_check')
-async def positive_check_handler(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    json_file.delete_the_record('shame.json', data['group_name'], data['shame_id'])
-    await check_history_handler(callback, state)
-
-
-@router.callback_query(filters.Admin(), F.data == 'negative_check')
-async def positive_check_handler(callback: CallbackQuery, state: FSMContext):
-    await check_history_handler(callback, state)
-
-
-@router.callback_query(filters.CallbackAccess(), F.data == 'add_shame')
-async def add_shame_handler(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    bot_message = await callback.bot.send_message(chat_id=callback.message.chat.id,
-                                                  text=f'Выбрана группа: {data["group_name"]}\n'
-                                                       f'Выбрано действие: Добавить позор\n'
-                                                       f'Опишите ситуацию',
-                                                  reply_to_message_id=data['start_message'].message_id,
-                                                  reply_markup=ForceReply(selective=True)
-                                                  )
-    await state.update_data(message_access=bot_message.message_id)
+@router.callback_query(F.data == 'go_back', filters.CallbackAccess())
+async def go_back_handler(callback: CallbackQuery, state: FSMContext):
+    await show_history_handler(callback.message, state, reply_flag=False)
     await callback.message.delete()
-    await state.set_state(ShameData.description)
 
 
-@router.message(filters.MessageAccess(), ShameData.description)
+@router.message(ShameData.description, filters.MessageAccess())
 async def description_handler(message: Message, state: FSMContext):
     await state.update_data(description=message.text)
     delta = datetime.timedelta(hours=3, minutes=0)
     data = await state.update_data(message_datetime=(message.date + delta).strftime('%d.%m.%y %H:%M'))
     json_file.add_record_to_json('shame.json', data['group_name'], data['message_datetime'], data['description'])
-    count = json_file.get_the_record_number('shame.json', data['group_name'])
-    await message.reply(text=f'Для {data["group_name"]} добавлен позор №{count} от {data["message_datetime"]}\n\n')
+    await message.reply(text=f'В группу "{data["group_name"]}" добавлена запись.')
     await state.clear()
