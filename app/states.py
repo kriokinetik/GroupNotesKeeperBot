@@ -1,18 +1,17 @@
 from aiogram.fsm.state import StatesGroup, State
 
 
-class ShameData(StatesGroup):
-    shame_id = State()
-    message_datetime = State()
-    description = State()
+class RecordData(StatesGroup):
+    record_id = State()
+    record_content = State()
 
 
 class AdminData(StatesGroup):
-    edited_description = State()
+    edited_record_content = State()
 
 
 class UserData(StatesGroup):
-    start_message = State()
-    message_access = State()
+    initial_message = State()
+    interaction_right = State()
     action = State()
     group_name = State()

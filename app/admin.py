@@ -5,53 +5,71 @@ from aiogram.fsm.context import FSMContext
 
 from app import json_file, filters, exceptions
 from app.states import AdminData
+from config import JSON_FILE_NAME
 
 router = Router()
 
 
-@router.message(Command('edit'), filters.MessageAccess(), filters.Admin())
+@router.message(Command('edit'), filters.DirectMessageFilter() or filters.GlobalAdminFilter())
 async def edit_record_handler(message: Message, state: FSMContext):
-    await message.reply(text='Отправьте исправленную запись.',
-                        reply_markup=ForceReply(selective=True))
-    await state.set_state(AdminData.edited_description)
+    try:
+        _ = (await state.get_data())["record_id"]
+        await message.reply('Отправьте исправленную запись.', reply_markup=ForceReply(selective=True))
+        await state.set_state(AdminData.edited_record_content)
+    except KeyError:
+        await message.reply('Выберите запись, которую хотите отредактировать, через /history.')
 
 
-@router.message(AdminData.edited_description, filters.Admin())
+@router.message(AdminData.edited_record_content, filters.DirectMessageFilter() or filters.GlobalAdminFilter())
 async def edited_descriprion_handler(message: Message, state: FSMContext):
-    data = await state.update_data(edited_description=message.text)
-    json_file.edit_json_record('shame.json', data['group_name'], data['shame_id'], data['edited_description'])
-    await message.reply(text='Запись отредактирована.')
+    data = await state.update_data(edited_record_content=message.text)
+    await json_file.edit_json_record(
+        JSON_FILE_NAME, message.chat.id, data["group_name"], data["record_id"], data["edited_record_content"]
+    )
+    await message.reply('Запись отредактирована.')
     await state.clear()
 
 
-@router.message(Command('delete_message'), filters.Admin())
+@router.message(Command('delete_message'), filters.DirectMessageFilter() or filters.GlobalAdminFilter())
 async def delete_message_handler(message: Message, state: FSMContext):
-    await message.reply_to_message.delete()
-    await state.clear()
+    try:
+        await message.reply_to_message.delete()
+        await state.clear()
+    except AttributeError:
+        await message.reply('Команду нужно вызывать ответом на сообщение.')
 
 
-@router.message(Command('delete_record'), filters.Admin())
+@router.message(Command('delete_record'), filters.DirectMessageFilter() or filters.GlobalAdminFilter())
 async def delete_record_handler(message: Message, state: FSMContext):
-    data = await state.get_data()
-    json_file.delete_the_record('shame.json', data['group_name'], data['shame_id'])
-    await message.reply(text='Запись удалена.')
+    try:
+        data = await state.get_data()
+        await json_file.delete_record(JSON_FILE_NAME, message.chat.id, data["group_name"], data["record_id"])
+        await message.reply('Запись удалена.')
+    except KeyError:
+        await message.reply('Выберите запись, которую хотите удалить, через /history.')
 
 
-@router.message(Command('add_group'), filters.Admin())
+@router.message(Command('create'), filters.DirectMessageFilter() or filters.GlobalAdminFilter())
 async def add_group_handler(message: Message):
-    group_name = message.text.split(' ', 1)[1]
     try:
-        json_file.add_group_to_json('shame.json', group_name)
-        await message.reply(text='Группа добавлена.')
+        group_name = message.text.split(' ', 1)[1]
+        await json_file.add_group_to_json(JSON_FILE_NAME, message.chat.id, group_name)
+        await message.reply('Группа добавлена.')
     except (exceptions.GroupAlreadyExistsError, exceptions.GroupLimitExceededError) as error:
-        await message.reply(text=str(error))
+        await message.reply(str(error))
+    except IndexError:
+        await message.reply('Пример использования:\n<pre>/create название_группы</pre>')
 
 
-@router.message(Command('delete_group'), filters.Admin())
+@router.message(Command('delete_group'), filters.DirectMessageFilter() or filters.GlobalAdminFilter())
 async def delete_group_handler(message: Message):
-    group_name = message.text.split(' ', 1)[1]
     try:
-        json_file.delete_group_from_json('shame.json', group_name)
-        await message.reply(text='Группа удалена.')
+        group_name = message.text.split(' ', 1)[1]
+        await json_file.delete_group_from_json(JSON_FILE_NAME, message.chat.id, group_name)
+        await message.reply('Группа удалена.')
     except exceptions.GroupNotFoundError as error:
-        await message.reply(text=str(error))
+        await message.reply(str(error))
+    except IndexError:
+        await message.reply(
+            'Пример использования:\n<pre>/delete_group название_группы</pre>'
+        )
