@@ -37,8 +37,8 @@ async def request_record(callback: CallbackQuery, state: FSMContext) -> None:
 async def edit_history_message(callback: CallbackQuery, group_name: str, record_id: int, record_count: int) -> None:
     chat_id = callback.message.chat.id
     record_data = await json_file.get_record_data(JSON_FILE_NAME, chat_id, group_name, record_id)
-    record_datetime = record_data["date"]
-    record_content = record_data["description"]
+    record_datetime = record_data["datetime"]
+    record_content = record_data["content"]
     await callback.message.edit_text(
         text=f'Группа "{group_name}". Запись {record_id + 1}/{record_count}\n\n'
              f'{record_datetime}\n'

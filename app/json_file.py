@@ -97,5 +97,5 @@ async def edit_json_record(file_name: str, chat_id: int, group_name: str, record
     available_chat_records_data = data[str(chat_id)]["records"]
     records = available_chat_records_data.get(group_name, [])
     if 0 <= record_id < len(records):
-        records[record_id]["description"] = new_description
+        records[record_id]["content"] = new_description
         await json_dump(file_name, data)
