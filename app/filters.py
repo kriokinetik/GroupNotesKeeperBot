@@ -5,36 +5,37 @@ from aiogram.fsm.context import FSMContext
 from config import admins
 
 
-class Admin(Filter):  # verification
+class GlobalAdminFilter(Filter):
     async def __call__(self, message: Message) -> bool:
         if message.from_user.id in admins:
             return True
-        else:
-            await message.reply(text='Недостаточно прав.')
-            return False
+        await message.reply('Недостаточно прав.')
+        return False
 
 
-class CallbackAccess(Filter):
+# class ChatOwnerFilter(Filter):
+
+
+class DirectMessageFilter(Filter):
+    async def __call__(self, message: Message) -> bool:
+        if message.from_user.id == message.chat.id:
+            return True
+        return False
+
+
+class CallbackAccessFilter(Filter):
     async def __call__(self, callback: CallbackQuery, state: FSMContext) -> bool:
         data = await state.get_data()
-        if data:
-            if data['message_access'] and callback.message.message_id == data['message_access']:
-                return True
-            else:
-                await callback.answer()
-                return False
-        else:
-            await callback.answer()
-            return False
+        if data and data.get('interaction_right') == callback.message.message_id:
+            return True
+        await callback.answer()
+        return False
 
 
-class MessageAccess(Filter):
+class MessageAccessFilter(Filter):
     async def __call__(self, message: Message, state: FSMContext) -> bool:
         data = await state.get_data()
-        if data and message.reply_to_message is not None:
-            if data['message_access'] and message.reply_to_message.message_id == data['message_access']:
+        if data and message.reply_to_message:
+            if data.get('interaction_right') == message.reply_to_message.message_id:
                 return True
-            else:
-                return False
-        else:
-            return False
+        return False
