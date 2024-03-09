@@ -1,25 +1,28 @@
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, ChatMemberOwner
 from aiogram.filters import Filter
 from aiogram.fsm.context import FSMContext
 
-from config import admins
+from config import global_admins
 
 
-class GlobalAdminFilter(Filter):
+class AdminFilter(Filter):
     async def __call__(self, message: Message) -> bool:
-        if message.from_user.id in admins:
+        chat_type = message.chat.type
+        chat_id = message.chat.id
+        user_id = message.from_user.id
+
+        if chat_type == 'private':
             return True
+
+        if user_id in global_admins:
+            return True
+
+        if chat_type == 'group':
+            chat_creator = await message.bot.get_chat_member(chat_id, user_id)
+            if isinstance(chat_creator, ChatMemberOwner):
+                return True
+
         await message.reply('Недостаточно прав.')
-        return False
-
-
-# class ChatOwnerFilter(Filter):
-
-
-class DirectMessageFilter(Filter):
-    async def __call__(self, message: Message) -> bool:
-        if message.from_user.id == message.chat.id:
-            return True
         return False
 
 
