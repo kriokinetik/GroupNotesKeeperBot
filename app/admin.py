@@ -10,7 +10,7 @@ from config import JSON_FILE_NAME
 router = Router()
 
 
-@router.message(Command('edit'), filters.DirectMessageFilter() or filters.GlobalAdminFilter())
+@router.message(Command('edit'), filters.AdminFilter())
 async def edit_record_handler(message: Message, state: FSMContext):
     try:
         _ = (await state.get_data())["record_id"]
@@ -20,7 +20,7 @@ async def edit_record_handler(message: Message, state: FSMContext):
         await message.reply('Выберите запись, которую хотите отредактировать, через /history.')
 
 
-@router.message(AdminData.edited_record_content, filters.DirectMessageFilter() or filters.GlobalAdminFilter())
+@router.message(AdminData.edited_record_content, filters.AdminFilter())
 async def edited_descriprion_handler(message: Message, state: FSMContext):
     data = await state.update_data(edited_record_content=message.text)
     await json_file.edit_json_record(
@@ -30,7 +30,7 @@ async def edited_descriprion_handler(message: Message, state: FSMContext):
     await state.clear()
 
 
-@router.message(Command('delete_message'), filters.DirectMessageFilter() or filters.GlobalAdminFilter())
+@router.message(Command('delete_message'), filters.AdminFilter())
 async def delete_message_handler(message: Message, state: FSMContext):
     try:
         await message.reply_to_message.delete()
@@ -39,7 +39,7 @@ async def delete_message_handler(message: Message, state: FSMContext):
         await message.reply('Команду нужно вызывать ответом на сообщение.')
 
 
-@router.message(Command('delete_record'), filters.DirectMessageFilter() or filters.GlobalAdminFilter())
+@router.message(Command('delete_record'), filters.AdminFilter())
 async def delete_record_handler(message: Message, state: FSMContext):
     try:
         data = await state.get_data()
@@ -49,7 +49,7 @@ async def delete_record_handler(message: Message, state: FSMContext):
         await message.reply('Выберите запись, которую хотите удалить, через /history.')
 
 
-@router.message(Command('create'), filters.DirectMessageFilter() or filters.GlobalAdminFilter())
+@router.message(Command('create'), filters.AdminFilter())
 async def add_group_handler(message: Message):
     try:
         group_name = message.text.split(' ', 1)[1]
@@ -61,7 +61,7 @@ async def add_group_handler(message: Message):
         await message.reply('Пример использования:\n<pre>/create название_группы</pre>')
 
 
-@router.message(Command('delete_group'), filters.DirectMessageFilter() or filters.GlobalAdminFilter())
+@router.message(Command('delete_group'), filters.AdminFilter())
 async def delete_group_handler(message: Message):
     try:
         group_name = message.text.split(' ', 1)[1]
