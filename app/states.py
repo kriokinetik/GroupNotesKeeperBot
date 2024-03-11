@@ -15,3 +15,4 @@ class UserData(StatesGroup):
     interaction_right = State()
     action = State()
     group_name = State()
+    admin = State()

@@ -19,8 +19,6 @@ async def main():
         BotCommand(command='add', description='Добавить запись'),
         BotCommand(command='create', description='Создать группу'),
         BotCommand(command='history', description='Просмотреть историю'),
-        BotCommand(command='edit', description='Отредактировать открытую ранее запись'),
-        BotCommand(command='delete_record', description='Удалить запись'),
         BotCommand(command='delete_group', description='Удалить группу'),
         BotCommand(command='delete_message', description='Удалить сообщение')
     ])

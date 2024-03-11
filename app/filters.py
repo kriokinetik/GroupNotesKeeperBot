@@ -30,7 +30,7 @@ class CallbackAdminFilter(Filter):
     async def __call__(self, callback: CallbackQuery) -> bool:
         chat_type = callback.message.chat.type
         chat_id = callback.message.chat.id
-        user_id = callback.message.from_user.id
+        user_id = callback.from_user.id
 
         if chat_type == 'private':
             return True
@@ -44,6 +44,27 @@ class CallbackAdminFilter(Filter):
                 return True
 
         await callback.message.reply('Недостаточно прав.')
+        await callback.answer()
+        return False
+
+
+class AdminHistoryFilter(Filter):
+    async def __call__(self, callback: CallbackQuery) -> bool:
+        chat_type = callback.message.chat.type
+        chat_id = callback.message.chat.id
+        user_id = callback.from_user.id
+
+        if chat_type == 'private':
+            return True
+
+        if user_id in global_admins:
+            return True
+
+        if chat_type == 'group':
+            chat_creator = await callback.bot.get_chat_member(chat_id, user_id)
+            if isinstance(chat_creator, ChatMemberOwner):
+                return True
+
         return False
 
 
