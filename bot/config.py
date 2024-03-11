@@ -8,4 +8,4 @@ token = os.environ['TOKEN']
 global_admins = list(map(int, os.getenv('ADMIN').split(',')))
 
 # const
-JSON_FILE_NAME = 'data.json'
+JSON_FILE_NAME = './bot/data.json'

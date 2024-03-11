@@ -1,6 +1,7 @@
 import json
 import aiofiles
-from app import exceptions
+
+from bot import exceptions
 
 
 async def json_load(file_name: str) -> dict:
@@ -21,15 +22,19 @@ async def json_dump(file_name: str, data: dict) -> None:
 async def check_records_existance(file_name: str, chat_id: int) -> bool:
     data = await json_load(file_name)
     available_chat_records_data = data[str(chat_id)]["records"]
+
     if not available_chat_records_data:
         return False
+
     return True
 
 
 async def start_json_session(file_name: str, chat_id: int) -> None:
     data = await json_load(file_name)
+
     if chat_id in data:
         return
+
     data[str(chat_id)] = {"admins": [], "records": {}}
     await json_dump(file_name, data)
 
@@ -37,8 +42,9 @@ async def start_json_session(file_name: str, chat_id: int) -> None:
 async def add_group_to_json(file_name: str, chat_id: int, group_name: str) -> None:
     data = await json_load(file_name)
     available_chat_records_data = data[str(chat_id)]["records"]
+
     if group_name in available_chat_records_data:
-        raise exceptions.GroupAlreadyExistsError
+        raise exceptions.GroupAlreadyExistsError(group_name)
 
     if len(available_chat_records_data) >= 5:
         raise exceptions.GroupLimitExceededError
@@ -50,11 +56,18 @@ async def add_group_to_json(file_name: str, chat_id: int, group_name: str) -> No
 async def delete_group_from_json(file_name: str, chat_id: int, group_name: str) -> None:
     data = await json_load(file_name)
     available_chat_records_data = data[str(chat_id)]["records"]
+
     if group_name not in available_chat_records_data:
-        raise exceptions.GroupNotFoundError
+        raise exceptions.GroupNotFoundError(group_name)
 
     available_chat_records_data.pop(group_name)
     await json_dump(file_name, data)
+
+
+async def get_groups(file_name: str, chat_id: int) -> list:
+    data = await json_load(file_name)
+    available_chat_records_data = data[str(chat_id)]["records"]
+    return list(available_chat_records_data.keys())
 
 
 async def add_record_to_json(file_name: str, chat_id: int, group_name: str, datetime: str, content: str) -> None:
@@ -63,12 +76,6 @@ async def add_record_to_json(file_name: str, chat_id: int, group_name: str, date
     record = {"datetime": datetime, "content": content}
     available_chat_records_data[group_name].append(record)
     await json_dump(file_name, data)
-
-
-async def get_groups(file_name: str, chat_id: int) -> list:
-    data = await json_load(file_name)
-    available_chat_records_data = data[str(chat_id)]["records"]
-    return list(available_chat_records_data.keys())
 
 
 async def get_record_count(file_name: str, chat_id: int, group_name: str) -> int:
@@ -83,19 +90,19 @@ async def get_record_data(file_name: str, chat_id: int, group_name: str, record_
     return available_chat_records_data[group_name][record_id]
 
 
-async def delete_record(file_name: str, chat_id: int, group_name: str, record_id: int) -> None:
-    data = await json_load(file_name)
-    available_chat_records_data = data[str(chat_id)]["records"]
-    records = available_chat_records_data.get(group_name, [])
-    if 0 <= record_id < len(records):
-        del records[record_id]
-        await json_dump(file_name, data)
-
-
 async def edit_json_record(file_name: str, chat_id: int, group_name: str, record_id: int, new_description: str) -> None:
     data = await json_load(file_name)
     available_chat_records_data = data[str(chat_id)]["records"]
     records = available_chat_records_data.get(group_name, [])
     if 0 <= record_id < len(records):
         records[record_id]["content"] = new_description
+        await json_dump(file_name, data)
+
+
+async def delete_record(file_name: str, chat_id: int, group_name: str, record_id: int) -> None:
+    data = await json_load(file_name)
+    available_chat_records_data = data[str(chat_id)]["records"]
+    records = available_chat_records_data.get(group_name, [])
+    if 0 <= record_id < len(records):
+        del records[record_id]
         await json_dump(file_name, data)
