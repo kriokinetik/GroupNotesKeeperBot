@@ -1,7 +1,7 @@
 import json
 import aiofiles
 
-from bot import exceptions
+import exceptions
 
 
 async def json_load(file_name: str) -> dict:

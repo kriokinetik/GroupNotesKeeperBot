@@ -7,7 +7,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.types import BotCommand
 from aiogram.enums import ParseMode
 
-from bot.handlers import admin, user
+from handlers import admin, user
 from config import token
 
 

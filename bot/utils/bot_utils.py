@@ -1,10 +1,10 @@
 from aiogram.types import Message, CallbackQuery, ForceReply
 from aiogram.fsm.context import FSMContext
 
-from bot import keyboards
-from bot.utils import json_utils
-from bot.states import RecordData
-from bot.config import JSON_FILE_NAME
+import keyboards
+from utils import json_utils
+from states import RecordData
+from config import JSON_FILE_NAME
 
 
 async def check_and_reply_empty_group(message: Message, state: FSMContext) -> bool:
@@ -62,7 +62,7 @@ async def edit_history_message(callback: CallbackQuery, state: FSMContext, group
 
     await callback.message.edit_text(
         text=f'<b>Группа "{group_name}"</b>\n'
-             f'<i>{record_datetime}, {record_id + 1}/{record_count}</i>'
+             f'{record_id + 1}/{record_count}, <i>{record_datetime}</i>'
              f'<blockquote>{record_content}</blockquote>',
         reply_markup=await keyboards.get_navigate_record_keyboard(admin=admin)
     )

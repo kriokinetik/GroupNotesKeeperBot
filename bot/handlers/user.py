@@ -5,10 +5,10 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
-from bot import filters, keyboards
-from bot.utils import bot_utils, json_utils
-from bot.states import RecordData
-from bot.config import JSON_FILE_NAME
+import filters, keyboards
+from utils import bot_utils, json_utils
+from states import RecordData
+from config import JSON_FILE_NAME
 
 router = Router()
 

@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from bot import buttons
-from bot.utils import json_utils
+import buttons
+from utils import json_utils
 
 
 async def get_group_selection_keyboard(message: Message, file_name: str) -> InlineKeyboardMarkup:
@@ -28,7 +28,7 @@ async def get_navigate_record_keyboard(admin: bool) -> InlineKeyboardMarkup:
     ]
 
     if admin:
-        keyboard.append([buttons.delete_record, buttons.edit_record])
+        keyboard.append([buttons.edit_record, buttons.delete_record])
 
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
