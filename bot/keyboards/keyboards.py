@@ -1,10 +1,11 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from app import buttons, json_file
+from bot import buttons
+from bot.utils import json_utils
 
 
 async def get_group_selection_keyboard(message: Message, file_name: str) -> InlineKeyboardMarkup:
     chat_id = message.chat.id
-    groups = await json_file.get_groups(file_name, chat_id)
+    groups = await json_utils.get_groups(file_name, chat_id)
 
     keyboard = [
         [InlineKeyboardButton(text=groups[i], callback_data=f'group_{groups[i]}'),
@@ -26,7 +27,6 @@ async def get_navigate_record_keyboard(admin: bool) -> InlineKeyboardMarkup:
         [buttons.go_back]
     ]
 
-    # Если вызвана команда /delete_record, добавляем кнопку "Удалить запись"
     if admin:
         keyboard.append([buttons.delete_record, buttons.edit_record])
 
@@ -38,6 +38,7 @@ go_back_keyboard = InlineKeyboardMarkup(
         [buttons.go_back]
     ]
 )
+
 
 confirm_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
