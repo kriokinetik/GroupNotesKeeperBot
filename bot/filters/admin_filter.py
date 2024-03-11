@@ -1,7 +1,7 @@
 from aiogram.types import CallbackQuery, Message, ChatMemberOwner
 from aiogram.filters import Filter
 
-from bot.config import global_admins
+from config import global_admins
 
 
 class AdminFilter(Filter):
