@@ -5,7 +5,7 @@ class GroupLimitExceededError(Exception):
 
 class GroupAlreadyExistsError(Exception):
     def __str__(self):
-        return 'Данная группа уже есть в списке.'
+        return 'Группа уже существует.'
 
 
 class GroupNotFoundError(Exception):

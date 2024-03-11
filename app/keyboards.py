@@ -20,15 +20,15 @@ async def get_group_selection_keyboard(message: Message, file_name: str) -> Inli
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 
-async def get_navigate_record_keyboard(root: bool) -> InlineKeyboardMarkup:
+async def get_navigate_record_keyboard(admin: bool) -> InlineKeyboardMarkup:
     keyboard = [
         [buttons.prev_record, buttons.next_record],
         [buttons.go_back]
     ]
 
     # Если вызвана команда /delete_record, добавляем кнопку "Удалить запись"
-    if root:
-        keyboard.append([buttons.delete_record])
+    if admin:
+        keyboard.append([buttons.delete_record, buttons.edit_record])
 
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
