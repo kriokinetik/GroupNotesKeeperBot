@@ -6,4 +6,6 @@ COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT [ "python", "./bot/main.py" ]
+WORKDIR /app/bot
+
+ENTRYPOINT [ "python", "./main.py" ]
