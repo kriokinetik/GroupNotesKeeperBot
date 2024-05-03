@@ -2,6 +2,8 @@ from aiogram.types import CallbackQuery, Message, ChatMemberOwner
 from aiogram.filters import Filter
 
 from config import global_admins
+from utils.json_utils import get_admins_list
+from config import JSON_FILE_NAME
 
 
 class AdminFilter(Filter):
@@ -15,11 +17,17 @@ class AdminFilter(Filter):
         else:
             chat_type = obj.chat.type
             chat_id = obj.chat.id
+
         user_id = obj.from_user.id
+        local_admins = await get_admins_list(JSON_FILE_NAME, chat_id)
+
         if chat_type == 'private':
             return True
 
         if user_id in global_admins:
+            return True
+
+        if user_id in local_admins:
             return True
 
         if chat_type == 'group':

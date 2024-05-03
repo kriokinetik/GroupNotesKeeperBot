@@ -106,3 +106,27 @@ async def delete_record(file_name: str, chat_id: int, group_name: str, record_id
     if 0 <= record_id < len(records):
         del records[record_id]
         await json_dump(file_name, data)
+
+
+async def add_admin(file_name: str, chat_id: int, user_id: int) -> None:
+    data = await json_load(file_name)
+    admins_list = data[str(chat_id)]["admins"]
+
+    if user_id not in admins_list:
+        admins_list.append(user_id)
+        await json_dump(file_name, data)
+
+
+async def delete_admin(file_name: str, chat_id: int, user_id: int) -> None:
+    data = await json_load(file_name)
+    admins_list = data[str(chat_id)]["admins"]
+
+    if user_id in admins_list:
+        admins_list.remove(user_id)
+        await json_dump(file_name, data)
+
+
+async def get_admins_list(file_name: str, chat_id: int) -> list:
+    data = await json_load(file_name)
+    admins_list = data[str(chat_id)]["admins"]
+    return admins_list
