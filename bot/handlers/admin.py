@@ -1,6 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, ForceReply, ReactionTypeEmoji
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 
 
@@ -71,27 +71,31 @@ async def confirm_deletion_handler(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(Command('create'), filters.AdminFilter(with_reply=True))
-async def add_group_handler(message: Message):
+async def add_group_handler(message: Message, command: CommandObject):
+    if command.args is None:
+        await message.reply('Пример использования:\n<pre>/delete_group название_группы</pre>')
+        return
+
     try:
-        group_name = message.text.split(' ', 1)[1]
+        group_name = command.args
         await json_utils.add_group_to_json(JSON_FILE_NAME, message.chat.id, group_name)
         await message.reply('Группа добавлена.')
     except (exceptions.GroupAlreadyExistsError, exceptions.GroupLimitExceededError) as error:
         await message.reply(str(error))
-    except IndexError:
-        await message.reply('Пример использования:\n<pre>/create название_группы</pre>')
 
 
 @router.message(Command('delete_group'), filters.AdminFilter(with_reply=True))
-async def delete_group_handler(message: Message):
+async def delete_group_handler(message: Message, command: CommandObject):
+    if command.args is None:
+        await message.reply('Пример использования:\n<pre>/delete_group название_группы</pre>')
+        return
+
     try:
-        group_name = message.text.split(' ', 1)[1]
+        group_name = command.args
         await json_utils.delete_group_from_json(JSON_FILE_NAME, message.chat.id, group_name)
         await message.reply('Группа удалена.')
     except exceptions.GroupNotFoundError as error:
         await message.reply(str(error))
-    except IndexError:
-        await message.reply('Пример использования:\n<pre>/delete_group название_группы</pre>')
 
 
 @router.message(Command('admin'), filters.MainAdminFilter())
