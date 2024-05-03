@@ -20,7 +20,9 @@ async def main():
         BotCommand(command='create', description='Создать группу'),
         BotCommand(command='history', description='Просмотреть историю'),
         BotCommand(command='delete_group', description='Удалить группу'),
-        BotCommand(command='delete_message', description='Удалить сообщение')
+        BotCommand(command='delete_message', description='Удалить сообщение'),
+        BotCommand(command='admin', description='Предоставить доступ к административным командам бота'),
+        BotCommand(command='delete_admin', description='Отозвать доступ к административным командам бота.')
     ])
     dp.include_routers(admin.router, user.router)
     await dp.start_polling(bot)

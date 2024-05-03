@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery, ForceReply
+from aiogram.types import Message, CallbackQuery, ForceReply, ReactionTypeEmoji
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
@@ -92,3 +92,29 @@ async def delete_group_handler(message: Message):
         await message.reply(str(error))
     except IndexError:
         await message.reply('Пример использования:\n<pre>/delete_group название_группы</pre>')
+
+
+@router.message(Command('admin'), filters.MainAdminFilter())
+async def add_admin_handler(message: Message):
+    if message.reply_to_message is None:
+        await message.reply('Команду нужно вызывать ответом на сообщение пользователя.')
+        return
+
+    chat_id = message.chat.id
+    user_id = message.reply_to_message.from_user.id
+
+    await json_utils.add_admin(JSON_FILE_NAME, chat_id, user_id)
+    await message.react(reaction=[ReactionTypeEmoji(emoji='💯')])
+
+
+@router.message(Command('delete_admin'), filters.MainAdminFilter())
+async def add_admin_handler(message: Message):
+    if message.reply_to_message is None:
+        await message.reply('Команду нужно вызывать ответом на сообщение пользователя.')
+        return
+
+    chat_id = message.chat.id
+    user_id = message.reply_to_message.from_user.id
+
+    await json_utils.delete_admin(JSON_FILE_NAME, chat_id, user_id)
+    await message.react(reaction=[ReactionTypeEmoji(emoji='💯')])
