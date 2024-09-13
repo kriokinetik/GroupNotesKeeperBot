@@ -36,4 +36,4 @@ jobs:
       -
         name: Trigger deployment pipeline
         run: |
-          curl -X POST -H "Authorization: ${{ secrets.DEPLOYMENT_WEBHOOK_AUTHORIZATION }}" -H "Content-Length: 0" "${{ secrets.DEPLOYMENT_WEBHOOK_ADDRESS }}"
+          curl -X POST -H "Authorization: ${{ secrets.DEPLOYMENT_WEBHOOK_AUTHORIZATION }}" -H "Content-Length: 0" -s -o /dev/null "${{ secrets.DEPLOYMENT_WEBHOOK_ADDRESS }}"
