@@ -7,7 +7,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.types import BotCommand
 from aiogram.enums import ParseMode
 
-from handlers import admin, user
+from handlers import admin, user, default
 from config import token
 
 
@@ -24,7 +24,7 @@ async def main():
         BotCommand(command='admin', description='Предоставить доступ к административным командам бота'),
         BotCommand(command='delete_admin', description='Отозвать доступ к административным командам бота.')
     ])
-    dp.include_routers(admin.router, user.router)
+    dp.include_routers(admin.router, user.router, default.router)
     await dp.start_polling(bot)
 
 
