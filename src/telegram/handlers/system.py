@@ -30,22 +30,34 @@ async def help_message(message: Message) -> None:
 
 @router.error()
 async def handle_storage_error(event: ErrorEvent) -> bool:
-    """Handle storage validation failures with a user-friendly reply."""
-
-    if not isinstance(event.exception, StorageDataError):
-        return False
-
-    logger.exception("Storage data error", exc_info=event.exception)
+    """Handle storage validation failures and unexpected errors."""
 
     update = event.update
-    if update.message is not None:
-        await update.message.reply(_("system_storage_invalid"))
+    if isinstance(event.exception, StorageDataError):
+        logger.exception("Storage data error", exc_info=event.exception)
+
+        if update.message is not None:
+            await update.message.reply(_("system_storage_invalid"))
+            return True
+
+        callback: CallbackQuery | None = update.callback_query
+        if callback is not None and callback.message is not None:
+            await callback.answer()
+            await callback.message.reply(_("system_storage_invalid"))
+            return True
+
         return True
 
-    callback: CallbackQuery | None = update.callback_query
+    logger.exception("Unhandled Telegram update error", exc_info=event.exception)
+
+    if update.message is not None:
+        await update.message.reply("Internal error")
+        return True
+
+    callback = update.callback_query
     if callback is not None and callback.message is not None:
         await callback.answer()
-        await callback.message.reply(_("system_storage_invalid"))
+        await callback.message.reply("Internal error")
         return True
 
-    return True
+    return False

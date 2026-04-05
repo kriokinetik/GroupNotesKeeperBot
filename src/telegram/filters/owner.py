@@ -1,10 +1,14 @@
 """Custom filter that grants access only to configured owners or chat owners."""
 
+import logging
+
 from aiogram.exceptions import TelegramAPIError
 from aiogram.filters import Filter
 from aiogram.types import CallbackQuery, ChatMemberOwner, Message
 
 from enums import ChatTypes
+
+logger = logging.getLogger(__name__)
 
 
 class IsOwner(Filter):
@@ -25,5 +29,10 @@ class IsOwner(Filter):
         try:
             chat_member = await message.bot.get_chat_member(message.chat.id, user.id)
         except TelegramAPIError:
+            logger.warning(
+                "Owner filter denied because chat member lookup failed chat_id=%s user_id=%s",
+                message.chat.id,
+                user.id,
+            )
             return False
         return isinstance(chat_member, ChatMemberOwner)
