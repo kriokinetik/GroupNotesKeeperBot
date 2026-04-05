@@ -4,7 +4,6 @@ import asyncio
 import json
 import logging
 from pathlib import Path
-from uuid import uuid4
 
 import aiofiles
 from pydantic import ValidationError
@@ -33,17 +32,11 @@ class JsonFileStore:
         return StorageData(schema_version=SCHEMA_VERSION)
 
     async def _save(self, data: StorageData) -> None:
-        """Persist storage data atomically using a temporary file."""
+        """Persist storage data by rewriting the target JSON file in place."""
 
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        temp_path = self.path.with_name(f"{self.path.name}.{uuid4().hex}.tmp")
-        try:
-            async with aiofiles.open(temp_path, mode="w", encoding="utf-8") as f:
-                await f.write(json.dumps(data.model_dump(mode="json"), ensure_ascii=False, indent=4))
-            temp_path.replace(self.path)
-        finally:
-            if temp_path.exists():
-                temp_path.unlink()
+        async with aiofiles.open(self.path, mode="w", encoding="utf-8") as f:
+            await f.write(json.dumps(data.model_dump(mode="json"), ensure_ascii=False, indent=4))
 
     async def _load(self) -> StorageData:
         """Load and validate the JSON storage file."""
