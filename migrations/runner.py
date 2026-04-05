@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -177,7 +178,7 @@ def upgrade_storage(
         current_version = next_version
 
     backup_path = _backup_path(path, f"backup_v{original_version}")
-    path.replace(backup_path)
+    shutil.copy2(path, backup_path)
     _write_payload(path, payload)
     logger.info(
         "Storage upgrade completed path=%s backup=%s from_version=%s to_version=%s",
@@ -253,7 +254,7 @@ def downgrade_storage(
         current_version = expected_version
 
     backup_path = _backup_path(path, f"backup_v{original_version}")
-    path.replace(backup_path)
+    shutil.copy2(path, backup_path)
     _write_payload(path, payload)
     logger.info(
         "Storage downgrade completed path=%s backup=%s from_version=%s to_version=%s",
