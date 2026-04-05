@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=75.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "GroupNotesKeeperBot"
+version = "1.0.0"
+description = "Telegram bot for grouped notes inside chats"
+readme = "README.md"
+requires-python = ">=3.14"
+scripts = { groupnoteskeeperbot = "main:run" }
+dependencies = [
+    "aiofiles>=25.1.0",
+    "aiogram>=3.27.0",
+    "babel>=2.18.0",
+    "colorlog>=6.10.1",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.13.1",
+]
+
+[dependency-groups]
+dev = [
+    "bandit>=1.9.4",
+    "black==26.3.1",
+]
+
+[tool.setuptools]
+py-modules = ["bootstrap", "main"]
+packages = [
+    "enums",
+    "errors",
+    "models",
+    "repositories",
+    "repositories.abstracts",
+    "repositories.json",
+    "settings",
+    "storage",
+    "telegram",
+    "telegram.callbacks",
+    "telegram.filters",
+    "telegram.fsm",
+    "telegram.fsm.states",
+    "telegram.handlers",
+    "telegram.keyboards",
+    "telegram.keyboards.buttons",
+    "telegram.middlewares",
+    "use_cases",
+    "use_cases.admins",
+    "use_cases.groups",
+    "use_cases.records",
+    "migrations",
+    "migrations.versions",
+]
+
+[tool.setuptools.package-dir]
+"" = "src"
+migrations = "migrations"
+"migrations.versions" = "migrations/versions"

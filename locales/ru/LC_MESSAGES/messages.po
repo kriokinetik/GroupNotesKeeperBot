@@ -1,0 +1,331 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version:  GroupNotesKeeperBot\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-04-05 07:22+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ru\n"
+"Language-Team: ru <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "command_show_help"
+msgstr "Показать справку"
+
+msgid "command_manage_groups"
+msgstr "Управление группами"
+
+msgid "command_add_entry"
+msgstr "Добавить запись"
+
+msgid "command_show_entry_history"
+msgstr "Показать историю записей"
+
+msgid "command_delete_replied_message"
+msgstr "Удалить сообщение по reply"
+
+msgid "command_manage_admins"
+msgstr "Управление администраторами"
+
+msgid "system_start_message"
+msgstr ""
+"<b>Привет!</b>\n"
+"\n"
+"Я помогаю вести заметки по группам: можно создавать группы, добавлять записи и быстро находить нужную информацию.\n"
+"\n"
+"Чтобы начать, открой управление группами через /groups, а затем добавляй записи командой /add.\n"
+"\n"
+"Полный список возможностей доступен по команде /help."
+
+msgid "system_help_message"
+msgstr ""
+"<b>Справка по командам</b>\n"
+"\n"
+"/start - краткое описание бота.\n"
+"/help - показать эту справку.\n"
+"/groups - создать, посмотреть или удалить группы.\n"
+"/add - добавить запись в выбранную группу.\n"
+"/history - открыть историю записей по группе.\n"
+"/delete - удалить сообщение или запись.\n"
+"/admin - посмотреть, добавить или удалить локальных администраторов."
+
+msgid "groups_title"
+msgstr "<b>Группы</b>\n"
+
+#, python-brace-format
+msgid "common_bullet_group_name"
+msgstr "• {group_name}"
+
+msgid "groups_empty"
+msgstr "Пока нет ни одной группы."
+
+msgid "groups_limit_reached"
+msgstr "<b>Лимит групп достигнут.</b>"
+
+msgid "groups_enter_new_name"
+msgstr "Введите название новой группы."
+
+msgid "groups_input_placeholder"
+msgstr "название группы"
+
+msgid "groups_choose_delete"
+msgstr "Выбери группу, которую нужно удалить."
+
+msgid "groups_name_empty"
+msgstr "<b>Название группы не может быть пустым.</b>"
+
+#, python-brace-format
+msgid "groups_already_exists"
+msgstr "Группа <b>{group_name}</b> уже существует."
+
+#, python-brace-format
+msgid "groups_added"
+msgstr "Группа <b>{group_name}</b> добавлена."
+
+#, python-brace-format
+msgid "groups_delete_confirm"
+msgstr "Удалить группу <b>{group_name}</b>?"
+
+msgid "groups_not_found"
+msgstr "<b>Группа не найдена.</b>"
+
+#, python-brace-format
+msgid "groups_deleted"
+msgstr "Группа <b>{group_name}</b> удалена."
+
+#, python-brace-format
+msgid "groups_delete_cancelled"
+msgstr "Удаление группы <b>{group_name}</b> отменено."
+
+msgid "admins_title"
+msgstr "<b>Администраторы</b>"
+
+msgid "admins_empty"
+msgstr ""
+"<b>Администраторы</b>\n"
+"Локальных администраторов пока нет."
+
+#, python-brace-format
+msgid "common_bullet_user_id"
+msgstr "• <code>{user_id}</code>"
+
+msgid "admins_reply_panel"
+msgstr ""
+"<b>Администраторы</b>\n"
+"Ответь ID пользователя, @username или упоминанием пользователя."
+
+msgid "admins_reply_target"
+msgstr "Ответь на это сообщение ID пользователя, @username или упоминанием."
+
+msgid "admins_user_unresolved"
+msgstr "Не удалось найти этого пользователя в чате."
+
+msgid "admins_user_not_in_chat"
+msgstr "Этот пользователь сейчас не состоит в чате."
+
+#, python-brace-format
+msgid "admins_user_id_already_admin"
+msgstr "Пользователь <code>{user_id}</code> уже является администратором."
+
+#, python-brace-format
+msgid "admins_user_id_granted"
+msgstr "Права администратора выданы пользователю <code>{user_id}</code>."
+
+#, python-brace-format
+msgid "admins_user_already_admin"
+msgstr "Пользователь {user} уже является администратором."
+
+#, python-brace-format
+msgid "admins_user_granted"
+msgstr "Права администратора выданы пользователю {user}."
+
+msgid "admins_delete_empty"
+msgstr ""
+"<b>Администраторы</b>\n"
+"Нет локальных администраторов для удаления."
+
+msgid "admins_select_remove"
+msgstr "<b>Выбери администратора для удаления.</b>"
+
+#, python-brace-format
+msgid "admins_remove_confirm"
+msgstr "Удалить администратора {user}?"
+
+#, python-brace-format
+msgid "admins_user_id_not_found"
+msgstr "Администратор <code>{user_id}</code> не найден."
+
+#, python-brace-format
+msgid "admins_user_removed"
+msgstr "Администратор {user} удалён."
+
+#, python-brace-format
+msgid "common_bullet_user_label"
+msgstr "• {user_label}"
+
+msgid "records_create_group_first"
+msgstr "Сначала создай группу через <code>/groups</code>."
+
+msgid "records_select_group"
+msgstr "<b>Выбери группу.</b>"
+
+msgid "records_groups_or_entries_empty"
+msgstr "Пока нет ни групп, ни записей."
+
+#, python-brace-format
+msgid "records_reply_entry_text"
+msgstr "Ответь на это сообщение текстом записи для группы <b>{group_name}</b>."
+
+msgid "records_entry_text_empty"
+msgstr "<b>Текст записи не может быть пустым.</b>"
+
+#, python-brace-format
+msgid "records_entry_added"
+msgstr "Запись добавлена в группу <b>{group_name}</b>."
+
+#, python-brace-format
+msgid "records_group_empty"
+msgstr "В группе <b>{group_name}</b> пока нет записей."
+
+msgid "records_entry_not_found"
+msgstr "Запись не найдена."
+
+msgid "records_reply_updated_entry_text_legacy"
+msgstr "Ответь новым текстом записи."
+
+msgid "records_entry_updated"
+msgstr "Запись обновлена."
+
+msgid "records_delete_confirm"
+msgstr "Удалить эту запись?"
+
+msgid "records_no_entries_left"
+msgstr "В этой группе больше не осталось записей."
+
+#, python-brace-format
+msgid "records_creation_cancelled_for_group"
+msgstr "Создание записи для группы <b>{group_name}</b> отменено."
+
+msgid "records_creation_cancelled"
+msgstr "Создание записи отменено."
+
+msgid "system_delete_use_reply"
+msgstr "Используйте эту команду в ответ на сообщение, которое хотите удалить."
+
+msgid "system_delete_failed"
+msgstr "Я не смог удалить это сообщение."
+
+msgid "system_storage_invalid"
+msgstr "Данные хранилища недействительны. Исправьте JSON-файл и перезапустите бота."
+
+msgid "month_january"
+msgstr "January"
+
+msgid "month_february"
+msgstr "February"
+
+msgid "month_march"
+msgstr "March"
+
+msgid "month_april"
+msgstr "April"
+
+msgid "month_may"
+msgstr "May"
+
+msgid "month_june"
+msgstr "June"
+
+msgid "month_july"
+msgstr "July"
+
+msgid "month_august"
+msgstr "August"
+
+msgid "month_september"
+msgstr "September"
+
+msgid "month_october"
+msgstr "October"
+
+msgid "month_november"
+msgstr "November"
+
+msgid "month_december"
+msgstr "December"
+
+msgid "month_january_genitive"
+msgstr "января"
+
+msgid "month_february_genitive"
+msgstr "февраля"
+
+msgid "month_march_genitive"
+msgstr "марта"
+
+msgid "month_april_genitive"
+msgstr "апреля"
+
+msgid "month_may_genitive"
+msgstr "мая"
+
+msgid "month_june_genitive"
+msgstr "июня"
+
+msgid "month_july_genitive"
+msgstr "июля"
+
+msgid "month_august_genitive"
+msgstr "августа"
+
+msgid "month_september_genitive"
+msgstr "сентября"
+
+msgid "month_october_genitive"
+msgstr "октября"
+
+msgid "month_november_genitive"
+msgstr "ноября"
+
+msgid "month_december_genitive"
+msgstr "декабря"
+
+msgid "common_yes"
+msgstr "Да"
+
+msgid "common_no"
+msgstr "Нет"
+
+msgid "common_add"
+msgstr "Добавить"
+
+msgid "common_delete"
+msgstr "Удалить"
+
+msgid "common_cancel"
+msgstr "Отмена"
+
+msgid "common_back"
+msgstr "Назад"
+
+msgid "common_edit"
+msgstr "Редактировать"
+
+msgid "groups_write_new_name_next_message"
+msgstr "Напишите название новой группы следующим сообщением."
+
+msgid "groups_reply_new_name"
+msgstr "Ответьте на это сообщение названием новой группы."
+
+msgid "records_reply_updated_entry_text"
+msgstr "Ответьте на это сообщение новым текстом записи."
+
+#, python-brace-format
+msgid "records_selected_group"
+msgstr "<b>Выбранная группа:</b> <b>{group_name}</b>"
+

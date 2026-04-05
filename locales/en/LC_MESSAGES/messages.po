@@ -1,0 +1,331 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version:  GroupNotesKeeperBot\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-04-05 07:22+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "command_show_help"
+msgstr "Show help"
+
+msgid "command_manage_groups"
+msgstr "Manage groups"
+
+msgid "command_add_entry"
+msgstr "Add an entry"
+
+msgid "command_show_entry_history"
+msgstr "Show entry history"
+
+msgid "command_delete_replied_message"
+msgstr "Delete a replied message"
+
+msgid "command_manage_admins"
+msgstr "Manage admins"
+
+msgid "system_start_message"
+msgstr ""
+"<b>Hello!</b>\n"
+"\n"
+"I help organize notes by groups: you can create groups, add entries, and quickly find the information you need.\n"
+"\n"
+"To get started, open group management with /groups and then add entries with /add.\n"
+"\n"
+"A full list of features is available via /help."
+
+msgid "system_help_message"
+msgstr ""
+"<b>Command Reference</b>\n"
+"\n"
+"/start - show a short introduction.\n"
+"/help - show this help message.\n"
+"/groups - create, view, or delete groups.\n"
+"/add - add an entry to a selected group.\n"
+"/history - open the entry history for a group.\n"
+"/delete - delete a replied message.\n"
+"/admin - view, add, or remove chat admins."
+
+msgid "groups_title"
+msgstr "<b>Groups</b>\n"
+
+#, python-brace-format
+msgid "common_bullet_group_name"
+msgstr "• {group_name}"
+
+msgid "groups_empty"
+msgstr "There are no groups yet."
+
+msgid "groups_limit_reached"
+msgstr "<b>The group limit has been reached.</b>"
+
+msgid "groups_write_new_name_next_message"
+msgstr "Write the new group name in the next message."
+
+msgid "groups_reply_new_name"
+msgstr "Reply to this message with the new group name."
+
+msgid "groups_enter_new_name"
+msgstr "Enter a new group name."
+
+msgid "groups_input_placeholder"
+msgstr "group name"
+
+msgid "groups_choose_delete"
+msgstr "Choose a group to delete."
+
+msgid "groups_name_empty"
+msgstr "<b>Group name cannot be empty.</b>"
+
+#, python-brace-format
+msgid "groups_already_exists"
+msgstr "Group <b>{group_name}</b> already exists."
+
+#, python-brace-format
+msgid "groups_added"
+msgstr "Group <b>{group_name}</b> has been added."
+
+#, python-brace-format
+msgid "groups_delete_confirm"
+msgstr "Delete group <b>{group_name}</b>?"
+
+msgid "groups_not_found"
+msgstr "<b>Group not found.</b>"
+
+#, python-brace-format
+msgid "groups_deleted"
+msgstr "Group <b>{group_name}</b> has been deleted."
+
+#, python-brace-format
+msgid "groups_delete_cancelled"
+msgstr "Deletion of group <b>{group_name}</b> has been cancelled."
+
+msgid "admins_title"
+msgstr "<b>Admins</b>"
+
+msgid "admins_empty"
+msgstr ""
+"<b>Admins</b>\n"
+"No chat admins yet."
+
+#, python-brace-format
+msgid "common_bullet_user_id"
+msgstr "• <code>{user_id}</code>"
+
+msgid "admins_reply_panel"
+msgstr ""
+"<b>Admins</b>\n"
+"Reply with a user ID, @username, or mention a user."
+
+msgid "admins_reply_target"
+msgstr "Reply to this message with a user ID, @username, or mention."
+
+msgid "admins_user_unresolved"
+msgstr "Could not resolve that user in this chat."
+
+msgid "admins_user_not_in_chat"
+msgstr "That user is not currently a member of this chat."
+
+#, python-brace-format
+msgid "admins_user_id_already_admin"
+msgstr "User <code>{user_id}</code> is already an admin."
+
+#, python-brace-format
+msgid "admins_user_id_granted"
+msgstr "Admin access granted to <code>{user_id}</code>."
+
+#, python-brace-format
+msgid "admins_user_already_admin"
+msgstr "User {user} is already an admin."
+
+#, python-brace-format
+msgid "admins_user_granted"
+msgstr "Admin access granted to {user}."
+
+msgid "admins_delete_empty"
+msgstr ""
+"<b>Admins</b>\n"
+"No chat admins to delete."
+
+msgid "admins_select_remove"
+msgstr "<b>Select an admin to remove.</b>"
+
+#, python-brace-format
+msgid "admins_remove_confirm"
+msgstr "Remove admin {user}?"
+
+#, python-brace-format
+msgid "admins_user_id_not_found"
+msgstr "Admin <code>{user_id}</code> was not found."
+
+#, python-brace-format
+msgid "admins_user_removed"
+msgstr "Admin {user} has been removed."
+
+#, python-brace-format
+msgid "common_bullet_user_label"
+msgstr "• {user_label}"
+
+msgid "records_create_group_first"
+msgstr "Create a group first with <code>/groups</code>."
+
+msgid "records_select_group"
+msgstr "<b>Select a group.</b>"
+
+msgid "records_groups_or_entries_empty"
+msgstr "There are no groups or entries yet."
+
+#, python-brace-format
+msgid "records_reply_entry_text"
+msgstr "Reply to this message with the entry text for group <b>{group_name}</b>."
+
+msgid "records_entry_text_empty"
+msgstr "<b>Entry text cannot be empty.</b>"
+
+#, python-brace-format
+msgid "records_entry_added"
+msgstr "The entry has been added to group <b>{group_name}</b>."
+
+#, python-brace-format
+msgid "records_group_empty"
+msgstr "Group <b>{group_name}</b> has no entries yet."
+
+msgid "records_entry_not_found"
+msgstr "Entry not found."
+
+msgid "records_reply_updated_entry_text_legacy"
+msgstr "Reply with the updated entry text."
+
+msgid "records_reply_updated_entry_text"
+msgstr "Reply to this message with the updated entry text."
+
+#, python-brace-format
+msgid "records_selected_group"
+msgstr "<b>Selected group:</b> <b>{group_name}</b>"
+
+msgid "records_entry_updated"
+msgstr "Entry updated."
+
+msgid "records_delete_confirm"
+msgstr "Delete this entry?"
+
+msgid "records_no_entries_left"
+msgstr "There are no entries left in this group."
+
+#, python-brace-format
+msgid "records_creation_cancelled_for_group"
+msgstr "Entry creation for group <b>{group_name}</b> has been cancelled."
+
+msgid "records_creation_cancelled"
+msgstr "Entry creation has been cancelled."
+
+msgid "system_delete_use_reply"
+msgstr "Use this command in reply to the message you want to delete."
+
+msgid "system_delete_failed"
+msgstr "I couldn't delete that message."
+
+msgid "system_storage_invalid"
+msgstr "Storage data is invalid. Please fix the JSON file and restart the bot."
+
+msgid "month_january"
+msgstr "January"
+
+msgid "month_february"
+msgstr "February"
+
+msgid "month_march"
+msgstr "March"
+
+msgid "month_april"
+msgstr "April"
+
+msgid "month_may"
+msgstr "May"
+
+msgid "month_june"
+msgstr "June"
+
+msgid "month_july"
+msgstr "July"
+
+msgid "month_august"
+msgstr "August"
+
+msgid "month_september"
+msgstr "September"
+
+msgid "month_october"
+msgstr "October"
+
+msgid "month_november"
+msgstr "November"
+
+msgid "month_december"
+msgstr "December"
+
+msgid "month_january_genitive"
+msgstr "January"
+
+msgid "month_february_genitive"
+msgstr "February"
+
+msgid "month_march_genitive"
+msgstr "March"
+
+msgid "month_april_genitive"
+msgstr "April"
+
+msgid "month_may_genitive"
+msgstr "May"
+
+msgid "month_june_genitive"
+msgstr "June"
+
+msgid "month_july_genitive"
+msgstr "July"
+
+msgid "month_august_genitive"
+msgstr "August"
+
+msgid "month_september_genitive"
+msgstr "September"
+
+msgid "month_october_genitive"
+msgstr "October"
+
+msgid "month_november_genitive"
+msgstr "November"
+
+msgid "month_december_genitive"
+msgstr "December"
+
+msgid "common_yes"
+msgstr "Yes"
+
+msgid "common_no"
+msgstr "No"
+
+msgid "common_add"
+msgstr "Add"
+
+msgid "common_delete"
+msgstr "Delete"
+
+msgid "common_cancel"
+msgstr "Cancel"
+
+msgid "common_back"
+msgstr "Back"
+
+msgid "common_edit"
+msgstr "Edit"
+

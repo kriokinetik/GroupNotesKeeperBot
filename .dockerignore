@@ -1,0 +1,15 @@
+.git/
+.github/
+.idea/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+.env
+data.json
+data_old.json
+
+docs/
+scripts/
