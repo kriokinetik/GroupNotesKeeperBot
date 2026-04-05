@@ -1,4 +1,5 @@
 data.json
+data.backup*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
