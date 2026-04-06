@@ -34,7 +34,7 @@ def _format_user_label(*, user_id: int, username: str | None, full_name: str) ->
     """Return the most readable label for a Telegram user."""
 
     if username:
-        return f"@{username}"
+        return username
     if full_name:
         return full_name
     return str(user_id)
