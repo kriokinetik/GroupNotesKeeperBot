@@ -51,8 +51,9 @@ def _format_user_reference(*, user_id: int, label: str) -> str:
 async def _resolve_user_label(message: Message, user_id: int) -> str:
     """Resolve a display label for a user who should belong to the chat."""
 
+    bot = message.bot
     try:
-        member = await message.bot.get_chat_member(message.chat.id, user_id)
+        member = await bot.get_chat_member(message.chat.id, user_id)
         user = member.user
         return _format_user_label(
             user_id=user_id,
@@ -94,13 +95,14 @@ async def _render_admins_text(message: Message, list_admins: ListAdminsUseCase) 
 async def _resolve_target_user_id(message: Message) -> int | None:
     """Resolve a target user from reply, mention, username, or raw numeric ID."""
 
+    bot = message.bot
     if message.reply_to_message and message.reply_to_message.from_user:
         return message.reply_to_message.from_user.id
 
     for entity in message.entities or []:
         if entity.type == "text_mention" and entity.user is not None:
             try:
-                await message.bot.get_chat_member(message.chat.id, entity.user.id)
+                await bot.get_chat_member(message.chat.id, entity.user.id)
             except TelegramAPIError:
                 return None
             return entity.user.id
@@ -109,7 +111,7 @@ async def _resolve_target_user_id(message: Message) -> int | None:
     if text.isdigit():
         user_id = int(text)
         try:
-            await message.bot.get_chat_member(message.chat.id, user_id)
+            await bot.get_chat_member(message.chat.id, user_id)
         except TelegramAPIError:
             return None
         return user_id
@@ -117,8 +119,8 @@ async def _resolve_target_user_id(message: Message) -> int | None:
     if text and message.chat.type in {ChatType.GROUP, ChatType.SUPERGROUP}:
         username = text if text.startswith("@") else f"@{text}"
         try:
-            chat = await message.bot.get_chat(username)
-            await message.bot.get_chat_member(message.chat.id, chat.id)
+            chat = await bot.get_chat(username)
+            await bot.get_chat_member(message.chat.id, chat.id)
         except TelegramAPIError:
             return None
         return chat.id
@@ -129,8 +131,9 @@ async def _resolve_target_user_id(message: Message) -> int | None:
 async def _is_user_in_chat(message: Message, user_id: int) -> bool:
     """Return whether the user is currently a member of the chat."""
 
+    bot = message.bot
     try:
-        member = await message.bot.get_chat_member(message.chat.id, user_id)
+        member = await bot.get_chat_member(message.chat.id, user_id)
     except TelegramAPIError:
         return False
     return member.status not in {ChatMemberStatus.LEFT, ChatMemberStatus.KICKED}
