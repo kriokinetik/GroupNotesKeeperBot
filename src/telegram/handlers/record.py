@@ -228,8 +228,9 @@ async def _render_history_message(
 ) -> None:
     """Render the current history view into the given message."""
 
+    bot = message.bot
     text, is_admin, can_navigate = await _build_history_payload(
-        bot=message.bot,
+        bot=bot,
         chat_id=message.chat.id,
         chat_type=message.chat.type,
         user_id=viewer_id,
@@ -288,8 +289,9 @@ async def _refresh_history_view(
 ) -> None:
     """Refresh the existing history message after state changes."""
 
+    bot = message.bot
     text, is_admin, can_navigate = await _build_history_payload(
-        bot=message.bot,
+        bot=bot,
         chat_id=message.chat.id,
         chat_type=message.chat.type,
         user_id=viewer_id,
@@ -301,7 +303,7 @@ async def _refresh_history_view(
     )
     data = await state.get_data()
     try:
-        await message.bot.edit_message_text(
+        await bot.edit_message_text(
             chat_id=message.chat.id,
             message_id=data[InteractionContextKeys.VIEW_MESSAGE_ID],
             text=text,
@@ -329,7 +331,7 @@ async def _refresh_history_view(
             content=escape(record.content),
             creator=record.creator,
         )
-        await message.bot.edit_message_text(
+        await bot.edit_message_text(
             chat_id=message.chat.id,
             message_id=data[InteractionContextKeys.VIEW_MESSAGE_ID],
             text=fallback_text,

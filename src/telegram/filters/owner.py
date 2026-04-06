@@ -18,6 +18,7 @@ class IsOwner(Filter):
         """Check whether the current user should be treated as an owner."""
 
         message = event if isinstance(event, Message) else event.message
+        bot = message.bot
         user = event.from_user
 
         if message.chat.type == ChatTypes.PRIVATE:
@@ -27,7 +28,7 @@ class IsOwner(Filter):
             return True
 
         try:
-            chat_member = await message.bot.get_chat_member(message.chat.id, user.id)
+            chat_member = await bot.get_chat_member(message.chat.id, user.id)
         except TelegramAPIError:
             logger.warning(
                 "Owner filter denied because chat member lookup failed chat_id=%s user_id=%s",

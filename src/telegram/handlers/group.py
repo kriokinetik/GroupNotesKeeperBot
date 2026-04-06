@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 
 NAMESPACE = NamespaceEnum.GROUPS
 
-
 @router.message(Command(CommandEnum.GROUPS), IsAdmin())
 async def handle_group_command(
     message: Message,
@@ -75,25 +74,24 @@ async def handle_add_group_callback(
     """Start the group creation flow."""
 
     await callback.answer()
-    message: Message = callback.message
     logger.debug(
         "Group add flow opened chat_id=%s user_id=%s",
-        message.chat.id,
+        callback.message.chat.id,
         callback.from_user.id,
     )
 
-    if await validate_group_limit(message.chat.id, settings.group_limit):
+    if await validate_group_limit(callback.message.chat.id, settings.group_limit):
         logger.info(
             "Group limit reached chat_id=%s limit=%s",
-            message.chat.id,
+            callback.message.chat.id,
             settings.group_limit,
         )
-        await message.edit_text(_("groups_limit_reached"))
+        await callback.message.edit_text(_("groups_limit_reached"))
         return
 
-    await message.edit_reply_markup()
-    await message.edit_text(_("groups_reply_new_name"))
-    await state.update_data({InteractionContextKeys.INTERACTION_IDS: message.message_id})
+    await callback.message.edit_reply_markup()
+    await callback.message.edit_text(_("groups_reply_new_name"))
+    await state.update_data({InteractionContextKeys.INTERACTION_IDS: callback.message.message_id})
     await state.set_state(GroupCreate.waiting_group_name)
 
 
@@ -105,19 +103,18 @@ async def handle_delete_group_callback(callback: CallbackQuery, storage: Storage
     """Show groups available for deletion."""
 
     await callback.answer()
-    message: Message = callback.message
     logger.debug(
         "Group delete selection opened chat_id=%s user_id=%s",
-        message.chat.id,
+        callback.message.chat.id,
         callback.from_user.id,
     )
 
     keyboard = await GroupKeyboard.groups(
         action=ManageEnum.DELETE,
-        chat_id=message.chat.id,
+        chat_id=callback.message.chat.id,
         storage=storage,
     )
-    await message.edit_text(
+    await callback.message.edit_text(
         text=_("groups_choose_delete"),
         reply_markup=keyboard,
     )
@@ -170,15 +167,14 @@ async def handle_delete_group(
     """Ask for confirmation before deleting the selected group."""
 
     await callback.answer()
-    message: Message = callback.message
     logger.debug(
         "Group delete confirmation requested chat_id=%s user_id=%s group=%r",
-        message.chat.id,
+        callback.message.chat.id,
         callback.from_user.id,
         callback_data.name,
     )
 
-    await message.edit_text(
+    await callback.message.edit_text(
         _("groups_delete_confirm").format(group_name=escape(callback_data.name)),
         reply_markup=CommonKeyboard.confirm(namespace=NAMESPACE, target=callback_data.name),
     )
@@ -197,28 +193,26 @@ async def handle_confirm_delete_yes(
     """Delete the selected group after confirmation."""
 
     await callback.answer()
-    message: Message = callback.message
-
     try:
-        await delete_group(message.chat.id, callback_data.target)
+        await delete_group(callback.message.chat.id, callback_data.target)
     except GroupNotFoundError:
         logger.warning(
             "Group deletion target missing chat_id=%s group=%r",
-            message.chat.id,
+            callback.message.chat.id,
             callback_data.target,
         )
-        await message.edit_text(_("groups_not_found"))
+        await callback.message.edit_text(_("groups_not_found"))
         await state.clear()
         return
 
     logger.info(
         "Group deleted chat_id=%s user_id=%s group=%r",
-        message.chat.id,
+        callback.message.chat.id,
         callback.from_user.id,
         callback_data.target,
     )
     await state.clear()
-    await message.edit_text(_("groups_deleted").format(group_name=escape(callback_data.target)))
+    await callback.message.edit_text(_("groups_deleted").format(group_name=escape(callback_data.target)))
 
 
 @router.callback_query(
@@ -234,13 +228,11 @@ async def handle_confirm_delete_no(
 
     await callback.answer()
     await state.clear()
-    message: Message = callback.message
-
     logger.debug(
         "Group deletion cancelled chat_id=%s user_id=%s group=%r",
-        message.chat.id,
+        callback.message.chat.id,
         callback.from_user.id,
         callback_data.target,
     )
 
-    await message.edit_text(_("groups_delete_cancelled").format(group_name=escape(callback_data.target)))
+    await callback.message.edit_text(_("groups_delete_cancelled").format(group_name=escape(callback_data.target)))
