@@ -30,7 +30,10 @@ COMMAND_DESCRIPTIONS = (
 def build_commands() -> list[BotCommand]:
     """Build the localized bot command list for the active locale."""
 
-    return [BotCommand(command=command, description=_(description)) for command, description in COMMAND_DESCRIPTIONS]
+    return [
+        BotCommand(command=command, description=_(description))
+        for command, description in COMMAND_DESCRIPTIONS
+    ]
 
 
 async def set_commands(bot: Bot, i18n: I18n) -> None:
@@ -42,7 +45,9 @@ async def set_commands(bot: Bot, i18n: I18n) -> None:
             with i18n.use_locale(locale):
                 commands = build_commands()
             await bot.set_my_commands(commands, language_code=locale)
-            logger.debug("Registered bot commands locale=%s count=%s", locale, len(commands))
+            logger.debug(
+                "Registered bot commands locale=%s count=%s", locale, len(commands)
+            )
 
         with i18n.use_locale(i18n.default_locale):
             default_commands = build_commands()
@@ -59,12 +64,20 @@ async def main() -> None:
 
     logger.info("Starting bot application")
     storage_upgraded = upgrade_storage_if_needed(JSON_PATH)
-    logger.info("Storage migration check completed upgraded=%s path=%s", storage_upgraded, JSON_PATH)
+    logger.info(
+        "Storage migration check completed upgraded=%s path=%s",
+        storage_upgraded,
+        JSON_PATH,
+    )
 
     dp = build_dispatcher()
     i18n = I18n(path=LOCALES_PATH, default_locale=settings.default_language)
     UserLanguageI18nMiddleware(i18n=i18n).setup(dp)
-    logger.debug("I18n configured default_locale=%s locales_path=%s", settings.default_language, LOCALES_PATH)
+    logger.debug(
+        "I18n configured default_locale=%s locales_path=%s",
+        settings.default_language,
+        LOCALES_PATH,
+    )
 
     bot = Bot(
         token=settings.token.get_secret_value(),

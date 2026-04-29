@@ -47,11 +47,15 @@ class CommonKeyboard:
                 [
                     InlineKeyboardButton(
                         text=_("common_add"),
-                        callback_data=ManageCallback(namespace=namespace, action=ManageEnum.ADD).pack(),
+                        callback_data=ManageCallback(
+                            namespace=namespace, action=ManageEnum.ADD
+                        ).pack(),
                     ),
                     InlineKeyboardButton(
                         text=_("common_delete"),
-                        callback_data=ManageCallback(namespace=namespace, action=ManageEnum.DELETE).pack(),
+                        callback_data=ManageCallback(
+                            namespace=namespace, action=ManageEnum.DELETE
+                        ).pack(),
                     ),
                 ]
             ]

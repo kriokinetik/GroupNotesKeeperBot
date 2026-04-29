@@ -41,10 +41,13 @@ class AsyncJsonGroupRepository(JsonFileStore, AbstractGroupRepository):
     async def get(self, chat_id: CID) -> tuple[str, ...]:
         """Return all group names for the chat."""
 
-        data = await self._load()
+        async with self._lock:
+            data = await self._load()
         chat_data = self._get_chat(data, chat_id)
         if not chat_data:
-            logger.debug("Group lookup failed because chat is missing chat_id=%s", chat_id)
+            logger.debug(
+                "Group lookup failed because chat is missing chat_id=%s", chat_id
+            )
             raise ChatNotFoundError(chat_id)
 
         return tuple(group.name for group in chat_data.groups)
@@ -56,7 +59,9 @@ class AsyncJsonGroupRepository(JsonFileStore, AbstractGroupRepository):
             data = await self._load()
             chat_data = self._get_chat(data, chat_id)
             if not chat_data:
-                logger.debug("Group deletion failed because chat is missing chat_id=%s", chat_id)
+                logger.debug(
+                    "Group deletion failed because chat is missing chat_id=%s", chat_id
+                )
                 raise ChatNotFoundError(chat_id)
 
             group = self._find_group(chat_data, name)
@@ -70,7 +75,9 @@ class AsyncJsonGroupRepository(JsonFileStore, AbstractGroupRepository):
 
             chat_data.groups.remove(group)
             await self._save(data)
-            logger.debug("Group removed from storage chat_id=%s group=%r", chat_id, name)
+            logger.debug(
+                "Group removed from storage chat_id=%s group=%r", chat_id, name
+            )
 
     async def edit(self, chat_id: CID, name: str, new_name: str) -> None:
         """Rename an existing group."""
@@ -87,12 +94,15 @@ class AsyncJsonGroupRepository(JsonFileStore, AbstractGroupRepository):
 
             group.name = new_name
             await self._save(data)
-            logger.debug("Group renamed chat_id=%s old=%r new=%r", chat_id, name, new_name)
+            logger.debug(
+                "Group renamed chat_id=%s old=%r new=%r", chat_id, name, new_name
+            )
 
     async def at_limit(self, chat_id: CID, limit: int) -> bool:
         """Return whether the chat already contains the maximum group count."""
 
-        data = await self._load()
+        async with self._lock:
+            data = await self._load()
         chat_data = self._get_chat(data, chat_id)
         if not chat_data:
             return False

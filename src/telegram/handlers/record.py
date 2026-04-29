@@ -43,6 +43,22 @@ DELETE_NAMESPACE = NamespaceEnum.RECORDS_DELETE
 CODE_LANGUAGE_RE = re.compile(r'<code\s+language="([^"]+)">')
 
 
+def _resolve_group_name_from_snapshot(data: dict, index: int) -> str | None:
+    """Resolve a group index from the group list snapshot stored in FSM."""
+
+    raw_groups = data.get(InteractionContextKeys.GROUPS)
+    if not isinstance(raw_groups, (list, tuple)):
+        return None
+
+    if not 0 <= index < len(raw_groups):
+        return None
+
+    group_name = raw_groups[index]
+    if not isinstance(group_name, str) or not group_name:
+        return None
+    return group_name
+
+
 def _normalize_telegram_html(value: str | None) -> str | None:
     """Normalize HTML produced from Telegram entities to Bot API compatible HTML."""
 
@@ -351,12 +367,16 @@ async def handle_add_command(
 ) -> None:
     """Start the flow for adding a record to a group."""
 
-    logger.debug("Handling /add chat_id=%s user_id=%s", message.chat.id, message.from_user.id)
+    logger.debug(
+        "Handling /add chat_id=%s user_id=%s", message.chat.id, message.from_user.id
+    )
     await state.clear()
 
     groups = await list_record_groups(message.chat.id)
     if not groups:
-        logger.debug("Add entry blocked because no groups exist chat_id=%s", message.chat.id)
+        logger.debug(
+            "Add entry blocked because no groups exist chat_id=%s", message.chat.id
+        )
         await message.reply(_("records_create_group_first"))
         return
 
@@ -366,12 +386,14 @@ async def handle_add_command(
             action=ManageEnum.SELECT,
             chat_id=message.chat.id,
             storage=storage,
+            groups=groups,
         ),
     )
     await state.update_data(
         {
             InteractionContextKeys.INTERACTION_IDS: bot_message.message_id,
             InteractionContextKeys.ACTION: RecordFlowEnum.ADD,
+            InteractionContextKeys.GROUPS: groups,
         }
     )
 
@@ -385,7 +407,9 @@ async def handle_history_command(
 ) -> None:
     """Start the flow for browsing record history by group."""
 
-    logger.debug("Handling /history chat_id=%s user_id=%s", message.chat.id, message.from_user.id)
+    logger.debug(
+        "Handling /history chat_id=%s user_id=%s", message.chat.id, message.from_user.id
+    )
     await state.clear()
 
     groups = await list_record_groups(message.chat.id)
@@ -400,17 +424,21 @@ async def handle_history_command(
             action=ManageEnum.SELECT,
             chat_id=message.chat.id,
             storage=storage,
+            groups=groups,
         ),
     )
     await state.update_data(
         {
             InteractionContextKeys.INTERACTION_IDS: bot_message.message_id,
             InteractionContextKeys.ACTION: RecordFlowEnum.HISTORY,
+            InteractionContextKeys.GROUPS: groups,
         }
     )
 
 
-@router.callback_query(GroupCallback.filter(F.action == ManageEnum.SELECT), IsInteractionOwner())
+@router.callback_query(
+    GroupCallback.filter(F.action == ManageEnum.SELECT), IsInteractionOwner()
+)
 async def handle_group_selection(
     callback: CallbackQuery,
     callback_data: GroupCallback,
@@ -425,18 +453,30 @@ async def handle_group_selection(
     await callback.answer()
     data = await state.get_data()
     action = data.get(InteractionContextKeys.ACTION, RecordFlowEnum.ADD)
+    group_name = _resolve_group_name_from_snapshot(data, callback_data.index)
+    if group_name is None:
+        logger.warning(
+            "Group selection target index is stale chat_id=%s user_id=%s index=%s",
+            callback.message.chat.id,
+            callback.from_user.id,
+            callback_data.index,
+        )
+        await state.clear()
+        await callback.message.edit_text(_("groups_not_found"))
+        return
+
     logger.debug(
         "Group selected for record flow chat_id=%s user_id=%s action=%s group=%r",
         callback.message.chat.id,
         callback.from_user.id,
         action,
-        callback_data.name,
+        group_name,
     )
 
     if action == RecordFlowEnum.HISTORY:
         await state.update_data(
             {
-                InteractionContextKeys.GROUP_NAME: callback_data.name,
+                InteractionContextKeys.GROUP_NAME: group_name,
                 InteractionContextKeys.RECORD_ID: 0,
                 InteractionContextKeys.VIEW_MESSAGE_ID: callback.message.message_id,
             }
@@ -452,10 +492,12 @@ async def handle_group_selection(
         )
         return
 
-    await state.update_data({InteractionContextKeys.GROUP_NAME: callback_data.name})
-    await callback.message.edit_text(_("records_selected_group").format(group_name=escape(callback_data.name)))
+    await state.update_data({InteractionContextKeys.GROUP_NAME: group_name})
+    await callback.message.edit_text(
+        _("records_selected_group").format(group_name=escape(group_name))
+    )
     prompt = await callback.message.answer(
-        _("records_reply_entry_text").format(group_name=escape(callback_data.name)),
+        _("records_reply_entry_text").format(group_name=escape(group_name)),
         reply_markup=ForceReply(selective=True),
     )
     await state.update_data({InteractionContextKeys.INTERACTION_IDS: prompt.message_id})
@@ -463,7 +505,9 @@ async def handle_group_selection(
 
 
 @router.message(RecordCreate.waiting_content, IsInteractionOwner())
-async def handle_record_content(message: Message, state: FSMContext, add_record: AddRecordUseCase) -> None:
+async def handle_record_content(
+    message: Message, state: FSMContext, add_record: AddRecordUseCase
+) -> None:
     """Persist a newly entered record and finish the creation flow."""
 
     data = await state.get_data()
@@ -549,8 +593,12 @@ async def handle_record_navigation(
     )
 
 
-@router.callback_query(RecordCallback.filter(F.action == RecordEnum.BACK), IsInteractionOwner())
-async def handle_history_back(callback: CallbackQuery, state: FSMContext, storage: StorageProtocol) -> None:
+@router.callback_query(
+    RecordCallback.filter(F.action == RecordEnum.BACK), IsInteractionOwner()
+)
+async def handle_history_back(
+    callback: CallbackQuery, state: FSMContext, storage: StorageProtocol
+) -> None:
     """Return from history view back to group selection."""
 
     await callback.answer()
@@ -565,17 +613,31 @@ async def handle_history_back(callback: CallbackQuery, state: FSMContext, storag
             InteractionContextKeys.INTERACTION_IDS: callback.message.message_id,
         }
     )
+    try:
+        groups = await storage.group.get(callback.message.chat.id)
+    except ChatNotFoundError:
+        groups = ()
+
+    if not groups:
+        await state.clear()
+        await callback.message.edit_text(_("records_groups_or_entries_empty"))
+        return
+
+    await state.update_data({InteractionContextKeys.GROUPS: groups})
     await callback.message.edit_text(
         _("records_select_group"),
         reply_markup=await GroupKeyboard.groups(
             action=ManageEnum.SELECT,
             chat_id=callback.message.chat.id,
             storage=storage,
+            groups=groups,
         ),
     )
 
 
-@router.callback_query(RecordCallback.filter(F.action == RecordEnum.EDIT), IsInteractionOwner(), IsAdmin())
+@router.callback_query(
+    RecordCallback.filter(F.action == RecordEnum.EDIT), IsInteractionOwner(), IsAdmin()
+)
 async def handle_edit_record_start(callback: CallbackQuery, state: FSMContext) -> None:
     """Start editing the currently selected record."""
 
@@ -682,12 +744,17 @@ async def handle_delete_record_start(callback: CallbackQuery) -> None:
     )
     await callback.message.edit_text(
         _("records_delete_confirm"),
-        reply_markup=CommonKeyboard.confirm(namespace=DELETE_NAMESPACE, target="record"),
+        reply_markup=CommonKeyboard.confirm(
+            namespace=DELETE_NAMESPACE, target="record"
+        ),
     )
 
 
 @router.callback_query(
-    ConfirmCallback.filter((F.namespace == DELETE_NAMESPACE) & (F.decision.in_({ConfirmEnum.YES, ConfirmEnum.NO}))),
+    ConfirmCallback.filter(
+        (F.namespace == DELETE_NAMESPACE)
+        & (F.decision.in_({ConfirmEnum.YES, ConfirmEnum.NO}))
+    ),
     IsInteractionOwner(),
     IsAdmin(),
 )
@@ -730,7 +797,9 @@ async def handle_delete_record_confirm(
             await state.clear()
             await callback.message.edit_text(_("records_entry_not_found"))
             return
-        remaining = await count_records(callback.message.chat.id, data[InteractionContextKeys.GROUP_NAME])
+        remaining = await count_records(
+            callback.message.chat.id, data[InteractionContextKeys.GROUP_NAME]
+        )
         if remaining == 0:
             logger.debug(
                 "Last record deleted in group chat_id=%s group=%r",

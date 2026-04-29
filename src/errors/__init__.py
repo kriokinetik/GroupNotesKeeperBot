@@ -1,7 +1,12 @@
 """Exports for project-specific exceptions."""
 
 from .admin import AdminAlreadyExistsError, AdminNotFoundError
-from .group import GroupAlreadyExistsError, GroupLimitExceededError, GroupNotFoundError
+from .group import (
+    GroupAlreadyExistsError,
+    GroupLimitExceededError,
+    GroupNameTooLongError,
+    GroupNotFoundError,
+)
 from .storage import ChatNotFoundError, RecordNotFoundError, StorageDataError
 
 __all__ = [
@@ -12,5 +17,6 @@ __all__ = [
     "StorageDataError",
     "GroupAlreadyExistsError",
     "GroupLimitExceededError",
+    "GroupNameTooLongError",
     "GroupNotFoundError",
 ]

@@ -18,7 +18,7 @@ class AbstractAdminRepository(ABC):
         """Remove a user from the chat administrators."""
 
     @abstractmethod
-    async def get(self, chat_id: CID) -> tuple[UID]:
+    async def get(self, chat_id: CID) -> tuple[UID, ...]:
         """Return a list of all administrators in a chat."""
 
     @abstractmethod

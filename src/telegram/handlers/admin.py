@@ -1,6 +1,7 @@
 """Telegram handlers for chat admin management and message deletion."""
 
 import logging
+from html import escape
 
 from aiogram import F, Router
 from aiogram.enums import ChatMemberStatus, ChatType
@@ -45,7 +46,7 @@ def _format_user_reference(*, user_id: int, label: str) -> str:
 
     if label == str(user_id):
         return f"<code>{user_id}</code>"
-    return label
+    return escape(label)
 
 
 async def _resolve_user_label(message: Message, user_id: int) -> str:
@@ -64,7 +65,9 @@ async def _resolve_user_label(message: Message, user_id: int) -> str:
         return str(user_id)
 
 
-async def _resolve_admin_labels(message: Message, admin_ids: tuple[int, ...]) -> tuple[tuple[int, str], ...]:
+async def _resolve_admin_labels(
+    message: Message, admin_ids: tuple[int, ...]
+) -> tuple[tuple[int, str], ...]:
     """Resolve display labels for all admin IDs in the chat."""
 
     items: list[tuple[int, str]] = []
@@ -88,7 +91,7 @@ async def _render_admins_text(message: Message, list_admins: ListAdminsUseCase) 
         if label == str(user_id):
             lines.append(_("common_bullet_user_id").format(user_id=user_id))
         else:
-            lines.append(_("common_bullet_user_label").format(user_label=label))
+            lines.append(_("common_bullet_user_label").format(user_label=escape(label)))
     return "\n".join(lines)
 
 
@@ -141,7 +144,10 @@ async def _is_user_in_chat(message: Message, user_id: int) -> bool:
 
 @router.message(Command(CommandEnum.ADMIN), IsOwner())
 async def handle_admin_command(
-    message: Message, state: FSMContext, grant_admin: GrantAdminUseCase, list_admins: ListAdminsUseCase
+    message: Message,
+    state: FSMContext,
+    grant_admin: GrantAdminUseCase,
+    list_admins: ListAdminsUseCase,
 ) -> None:
     """Open admin management or grant admin rights from a replied message."""
 
@@ -154,7 +160,9 @@ async def handle_admin_command(
             username=message.reply_to_message.from_user.username,
             full_name=message.reply_to_message.from_user.full_name,
         )
-        target_user_ref = _format_user_reference(user_id=target_user_id, label=target_user_label)
+        target_user_ref = _format_user_reference(
+            user_id=target_user_id, label=target_user_label
+        )
         if not await _is_user_in_chat(message, target_user_id):
             logger.debug(
                 "Admin grant by reply rejected because user is not in chat chat_id=%s owner_id=%s target_user_id=%s",
@@ -167,7 +175,9 @@ async def handle_admin_command(
         try:
             await grant_admin(message.chat.id, target_user_id)
         except AdminAlreadyExistsError:
-            await message.reply(_("admins_user_already_admin").format(user=target_user_ref))
+            await message.reply(
+                _("admins_user_already_admin").format(user=target_user_ref)
+            )
             return
 
         logger.info(
@@ -180,8 +190,12 @@ async def handle_admin_command(
         return
 
     text = await _render_admins_text(message, list_admins)
-    bot_message = await message.reply(text, reply_markup=CommonKeyboard.manage(namespace=NAMESPACE))
-    await state.update_data({InteractionContextKeys.INTERACTION_IDS: bot_message.message_id})
+    bot_message = await message.reply(
+        text, reply_markup=CommonKeyboard.manage(namespace=NAMESPACE)
+    )
+    await state.update_data(
+        {InteractionContextKeys.INTERACTION_IDS: bot_message.message_id}
+    )
 
 
 @router.callback_query(
@@ -212,7 +226,9 @@ async def handle_admin_add_callback(callback: CallbackQuery, state: FSMContext) 
 
 
 @router.message(AdminManage.waiting_target, IsInteractionOwner(), IsOwner())
-async def handle_admin_add_input(message: Message, state: FSMContext, grant_admin: GrantAdminUseCase) -> None:
+async def handle_admin_add_input(
+    message: Message, state: FSMContext, grant_admin: GrantAdminUseCase
+) -> None:
     """Grant admin access to the resolved target user."""
 
     target_user_id = await _resolve_target_user_id(message)
@@ -225,7 +241,9 @@ async def handle_admin_add_input(message: Message, state: FSMContext, grant_admi
         await message.reply(_("admins_user_unresolved"))
         return
     target_user_label = await _resolve_user_label(message, target_user_id)
-    target_user_ref = _format_user_reference(user_id=target_user_id, label=target_user_label)
+    target_user_ref = _format_user_reference(
+        user_id=target_user_id, label=target_user_label
+    )
 
     try:
         await grant_admin(message.chat.id, target_user_id)
@@ -259,17 +277,23 @@ async def handle_admin_delete_callback(
         await callback.message.edit_text(_("admins_delete_empty"))
         return
 
-    await state.update_data({InteractionContextKeys.INTERACTION_IDS: callback.message.message_id})
+    await state.update_data(
+        {InteractionContextKeys.INTERACTION_IDS: callback.message.message_id}
+    )
     admin_labels = await _resolve_admin_labels(callback.message, admin_ids)
     await callback.message.edit_text(
         _("admins_select_remove"),
-        reply_markup=AdminKeyboard.admins(action=ManageEnum.DELETE, admins=admin_labels),
+        reply_markup=AdminKeyboard.admins(
+            action=ManageEnum.DELETE, admins=admin_labels
+        ),
     )
 
 
 @router.chat_member()
 async def handle_chat_member_update(
-    event: ChatMemberUpdated, list_admins: ListAdminsUseCase, revoke_admin: RevokeAdminUseCase
+    event: ChatMemberUpdated,
+    list_admins: ListAdminsUseCase,
+    revoke_admin: RevokeAdminUseCase,
 ) -> None:
     """Remove chat admin access automatically when a member leaves the chat."""
 
@@ -299,8 +323,12 @@ async def handle_chat_member_update(
     )
 
 
-@router.callback_query(AdminCallback.filter(F.action == ManageEnum.DELETE), IsInteractionOwner(), IsOwner())
-async def handle_admin_delete_select(callback: CallbackQuery, callback_data: AdminCallback) -> None:
+@router.callback_query(
+    AdminCallback.filter(F.action == ManageEnum.DELETE), IsInteractionOwner(), IsOwner()
+)
+async def handle_admin_delete_select(
+    callback: CallbackQuery, callback_data: AdminCallback
+) -> None:
     """Ask for confirmation before removing the selected chat admin."""
 
     await callback.answer()
@@ -314,12 +342,17 @@ async def handle_admin_delete_select(callback: CallbackQuery, callback_data: Adm
     )
     await callback.message.edit_text(
         _("admins_remove_confirm").format(user=user_ref),
-        reply_markup=CommonKeyboard.confirm(namespace=DELETE_NAMESPACE, target=str(callback_data.user_id)),
+        reply_markup=CommonKeyboard.confirm(
+            namespace=DELETE_NAMESPACE, target=str(callback_data.user_id)
+        ),
     )
 
 
 @router.callback_query(
-    ConfirmCallback.filter((F.namespace == DELETE_NAMESPACE) & (F.decision.in_({ConfirmEnum.YES, ConfirmEnum.NO}))),
+    ConfirmCallback.filter(
+        (F.namespace == DELETE_NAMESPACE)
+        & (F.decision.in_({ConfirmEnum.YES, ConfirmEnum.NO}))
+    ),
     IsInteractionOwner(),
     IsOwner(),
 )
@@ -333,7 +366,9 @@ async def handle_admin_delete_confirm(
     """Confirm or cancel chat admin removal."""
 
     await callback.answer()
-    await state.update_data({InteractionContextKeys.INTERACTION_IDS: callback.message.message_id})
+    await state.update_data(
+        {InteractionContextKeys.INTERACTION_IDS: callback.message.message_id}
+    )
 
     if callback_data.decision == ConfirmEnum.YES:
         user_id = int(callback_data.target)
@@ -342,7 +377,9 @@ async def handle_admin_delete_confirm(
         try:
             await revoke_admin(callback.message.chat.id, user_id)
         except AdminNotFoundError:
-            await callback.message.edit_text(_("admins_user_id_not_found").format(user_id=user_id))
+            await callback.message.edit_text(
+                _("admins_user_id_not_found").format(user_id=user_id)
+            )
             return
 
         logger.info(
@@ -369,7 +406,9 @@ async def handle_admin_delete_confirm(
     admin_labels = await _resolve_admin_labels(callback.message, admin_ids)
     await callback.message.edit_text(
         _("admins_select_remove"),
-        reply_markup=AdminKeyboard.admins(action=ManageEnum.DELETE, admins=admin_labels),
+        reply_markup=AdminKeyboard.admins(
+            action=ManageEnum.DELETE, admins=admin_labels
+        ),
     )
 
 
@@ -394,7 +433,11 @@ async def handle_delete_message(message: Message) -> None:
     )
     try:
         await message.reply_to_message.delete()
-    except TelegramBadRequest, TelegramForbiddenError, TelegramAPIError:
+    except (
+        TelegramBadRequest,
+        TelegramForbiddenError,
+        TelegramAPIError,
+    ):
         logger.warning(
             "Delete message failed chat_id=%s user_id=%s target_message_id=%s",
             message.chat.id,
@@ -406,7 +449,11 @@ async def handle_delete_message(message: Message) -> None:
 
     try:
         await message.delete()
-    except TelegramBadRequest, TelegramForbiddenError, TelegramAPIError:
+    except (
+        TelegramBadRequest,
+        TelegramForbiddenError,
+        TelegramAPIError,
+    ):
         logger.warning(
             "Command delete failed after target deletion chat_id=%s user_id=%s command_message_id=%s",
             message.chat.id,

@@ -20,7 +20,9 @@ class AbstractRecordRepository(ABC, Generic[T]):
         """Retrieve a record by its ID from a specific group."""
 
     @abstractmethod
-    async def edit(self, chat_id: CID, group_name: str, record_id: RID, new_record: T) -> None:
+    async def edit(
+        self, chat_id: CID, group_name: str, record_id: RID, new_record: T
+    ) -> None:
         """Update an existing record in a specific group."""
 
     @abstractmethod

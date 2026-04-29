@@ -27,7 +27,10 @@ class IsInteractionOwner(Filter):
             interaction_ids = {raw_interaction_ids}
 
         if isinstance(event, Message):
-            return bool(event.reply_to_message and event.reply_to_message.message_id in interaction_ids)
+            return bool(
+                event.reply_to_message
+                and event.reply_to_message.message_id in interaction_ids
+            )
 
         if isinstance(event, CallbackQuery):
             return event.message.message_id in interaction_ids

@@ -20,7 +20,9 @@ class AsyncJsonRecordRepository(JsonFileStore, AbstractRecordRepository[Record])
             data = await self._load()
             chat_data = self._get_chat(data, chat_id)
             if not chat_data:
-                logger.debug("Record creation failed because chat is missing chat_id=%s", chat_id)
+                logger.debug(
+                    "Record creation failed because chat is missing chat_id=%s", chat_id
+                )
                 raise ChatNotFoundError(chat_id)
 
             group = self._find_group(chat_data, group_name)
@@ -45,10 +47,13 @@ class AsyncJsonRecordRepository(JsonFileStore, AbstractRecordRepository[Record])
     async def get(self, chat_id: CID, group_name: str, record_id: RID) -> Record | None:
         """Return a record by index or ``None`` if it does not exist."""
 
-        data = await self._load()
+        async with self._lock:
+            data = await self._load()
         chat_data = self._get_chat(data, chat_id)
         if not chat_data:
-            logger.debug("Record lookup skipped because chat is missing chat_id=%s", chat_id)
+            logger.debug(
+                "Record lookup skipped because chat is missing chat_id=%s", chat_id
+            )
             return None
 
         group = self._find_group(chat_data, group_name)
@@ -72,14 +77,18 @@ class AsyncJsonRecordRepository(JsonFileStore, AbstractRecordRepository[Record])
 
         return records[record_id]
 
-    async def edit(self, chat_id: CID, group_name: str, record_id: RID, record: Record) -> None:
+    async def edit(
+        self, chat_id: CID, group_name: str, record_id: RID, record: Record
+    ) -> None:
         """Update record content by index."""
 
         async with self._lock:
             data = await self._load()
             chat_data = self._get_chat(data, chat_id)
             if not chat_data:
-                logger.debug("Record edit failed because chat is missing chat_id=%s", chat_id)
+                logger.debug(
+                    "Record edit failed because chat is missing chat_id=%s", chat_id
+                )
                 raise ChatNotFoundError(chat_id)
 
             group = self._find_group(chat_data, group_name)
@@ -116,7 +125,9 @@ class AsyncJsonRecordRepository(JsonFileStore, AbstractRecordRepository[Record])
             data = await self._load()
             chat_data = self._get_chat(data, chat_id)
             if not chat_data:
-                logger.debug("Record deletion failed because chat is missing chat_id=%s", chat_id)
+                logger.debug(
+                    "Record deletion failed because chat is missing chat_id=%s", chat_id
+                )
                 raise ChatNotFoundError(chat_id)
 
             group = self._find_group(chat_data, group_name)
@@ -154,7 +165,8 @@ class AsyncJsonRecordRepository(JsonFileStore, AbstractRecordRepository[Record])
     async def count(self, chat_id: CID, group_name: str) -> int:
         """Return the number of records in a group."""
 
-        data = await self._load()
+        async with self._lock:
+            data = await self._load()
         chat_data = self._get_chat(data, chat_id)
         if not chat_data:
             return 0

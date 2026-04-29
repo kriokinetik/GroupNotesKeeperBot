@@ -14,13 +14,17 @@ class RecordButtons:
     def prev() -> InlineKeyboardButton:
         """Return the button for navigating to the previous record."""
 
-        return InlineKeyboardButton(text="<", callback_data=RecordCallback(action=RecordEnum.PREV).pack())
+        return InlineKeyboardButton(
+            text="<", callback_data=RecordCallback(action=RecordEnum.PREV).pack()
+        )
 
     @staticmethod
     def next() -> InlineKeyboardButton:
         """Return the button for navigating to the next record."""
 
-        return InlineKeyboardButton(text=">", callback_data=RecordCallback(action=RecordEnum.NEXT).pack())
+        return InlineKeyboardButton(
+            text=">", callback_data=RecordCallback(action=RecordEnum.NEXT).pack()
+        )
 
     @staticmethod
     def back() -> InlineKeyboardButton:

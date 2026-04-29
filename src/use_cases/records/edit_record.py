@@ -11,7 +11,12 @@ class EditRecordUseCase:
         self.storage = storage
 
     async def __call__(
-        self, chat_id: int, group_name: str, record_id: int, content: str, content_html: str | None
+        self,
+        chat_id: int,
+        group_name: str,
+        record_id: int,
+        content: str,
+        content_html: str | None,
     ) -> None:
         """Persist the new record content."""
 

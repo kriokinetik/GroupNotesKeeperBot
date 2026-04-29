@@ -35,11 +35,14 @@ def _validate_registry(migrations: list[Migration]) -> None:
     for idx, migration in enumerate(ordered):
         if migration.to_version <= migration.from_version:
             raise MigrationError(
-                f"Invalid version step in {migration.revision}: " f"{migration.from_version} -> {migration.to_version}"
+                f"Invalid version step in {migration.revision}: "
+                f"{migration.from_version} -> {migration.to_version}"
             )
         if idx == 0:
             if migration.down_revision is not None:
-                raise MigrationError(f"First migration {migration.revision} must have down_revision=None.")
+                raise MigrationError(
+                    f"First migration {migration.revision} must have down_revision=None."
+                )
             continue
         prev = ordered[idx - 1]
         if migration.down_revision != prev.revision:
@@ -75,13 +78,18 @@ def _read_payload(path: Path) -> dict[str, Any]:
 
 
 def _write_payload(path: Path, payload: dict[str, Any]) -> None:
-    with path.open("w", encoding="utf-8") as file:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    mode = "r+" if path.exists() else "w+"
+    with path.open(mode, encoding="utf-8") as file:
+        file.seek(0)
         json.dump(payload, file, ensure_ascii=False, indent=2)
         file.write("\n")
+        file.truncate()
+        file.flush()
 
 
 def _backup_path(path: Path, suffix: str) -> Path:
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     return path.with_name(f"{path.stem}.{suffix}.{timestamp}{path.suffix}")
 
 
@@ -91,13 +99,17 @@ def _detect_schema_version(payload: dict[str, Any]) -> int:
         # Legacy payloads do not declare schema_version and are treated as v0.
         return 0
     if not isinstance(version, int):
-        raise MigrationError(f"schema_version must be int, got: {type(version).__name__}")
+        raise MigrationError(
+            f"schema_version must be int, got: {type(version).__name__}"
+        )
     if version < 0:
         raise MigrationError(f"schema_version must be >= 0, got: {version}")
     return version
 
 
-def _select_upgrade(from_version: int, include_tags: set[str] | None) -> Migration | None:
+def _select_upgrade(
+    from_version: int, include_tags: set[str] | None
+) -> Migration | None:
     candidates = [item for item in MIGRATIONS if item.from_version == from_version]
     if include_tags is None:
         return candidates[0] if candidates else None
@@ -105,7 +117,9 @@ def _select_upgrade(from_version: int, include_tags: set[str] | None) -> Migrati
     return tagged[0] if tagged else None
 
 
-def _select_downgrade(from_version: int, include_tags: set[str] | None) -> Migration | None:
+def _select_downgrade(
+    from_version: int, include_tags: set[str] | None
+) -> Migration | None:
     candidates = [item for item in MIGRATIONS if item.to_version == from_version]
     if include_tags is None:
         return candidates[0] if candidates else None
@@ -130,7 +144,9 @@ def upgrade_storage(
     latest_version = latest_schema_version()
     requested_target = latest_version if target_version is None else target_version
     if requested_target > latest_version:
-        raise MigrationError(f"Target schema version {requested_target} is above latest {latest_version}.")
+        raise MigrationError(
+            f"Target schema version {requested_target} is above latest {latest_version}."
+        )
 
     payload = _read_payload(path)
     current_version = _detect_schema_version(payload)
@@ -141,23 +157,33 @@ def upgrade_storage(
         requested_target,
     )
     if current_version > latest_version:
-        raise MigrationError(f"Storage schema version {current_version} is newer than known {latest_version}.")
+        raise MigrationError(
+            f"Storage schema version {current_version} is newer than known {latest_version}."
+        )
     if current_version == requested_target:
-        logger.info("Upgrade skipped because storage is already at target path=%s version=%s", path, current_version)
+        logger.info(
+            "Upgrade skipped because storage is already at target path=%s version=%s",
+            path,
+            current_version,
+        )
         return False
     if current_version > requested_target:
         raise MigrationError(
-            f"Current schema version {current_version} is above target {requested_target}. " "Use downgrade instead."
+            f"Current schema version {current_version} is above target {requested_target}. "
+            "Use downgrade instead."
         )
 
     original_version = current_version
     while current_version < requested_target:
         migration = _select_upgrade(current_version, include_tags)
         if migration is None:
-            raise MigrationError(f"Missing migration step for schema version {current_version}.")
+            raise MigrationError(
+                f"Missing migration step for schema version {current_version}."
+            )
         if migration.from_version != current_version:
             raise MigrationError(
-                f"Migration chain mismatch on {migration.revision}: " f"expected from_version={current_version}."
+                f"Migration chain mismatch on {migration.revision}: "
+                f"expected from_version={current_version}."
             )
 
         logger.info(
@@ -168,7 +194,9 @@ def upgrade_storage(
         )
         payload = migration.upgrade(payload, timezone_name)
         if not isinstance(payload, dict):
-            raise MigrationError(f"Migration {migration.revision} returned non-object payload.")
+            raise MigrationError(
+                f"Migration {migration.revision} returned non-object payload."
+            )
         next_version = _detect_schema_version(payload)
         if next_version != migration.to_version:
             raise MigrationError(
@@ -200,7 +228,9 @@ def downgrade_storage(
     """Downgrade storage to target schema version sequentially."""
 
     if not path.exists():
-        logger.info("Downgrade skipped because storage file does not exist path=%s", path)
+        logger.info(
+            "Downgrade skipped because storage file does not exist path=%s", path
+        )
         return False
 
     _validate_registry(MIGRATIONS)
@@ -216,21 +246,29 @@ def downgrade_storage(
         target_version,
     )
     if current_version == target_version:
-        logger.info("Downgrade skipped because storage is already at target path=%s version=%s", path, current_version)
+        logger.info(
+            "Downgrade skipped because storage is already at target path=%s version=%s",
+            path,
+            current_version,
+        )
         return False
     if current_version < target_version:
         raise MigrationError(
-            f"Current schema version {current_version} is below target {target_version}. " "Use upgrade instead."
+            f"Current schema version {current_version} is below target {target_version}. "
+            "Use upgrade instead."
         )
 
     original_version = current_version
     while current_version > target_version:
         migration = _select_downgrade(current_version, include_tags)
         if migration is None:
-            raise MigrationError(f"Missing downgrade step for schema version {current_version}.")
+            raise MigrationError(
+                f"Missing downgrade step for schema version {current_version}."
+            )
         if migration.to_version != current_version:
             raise MigrationError(
-                f"Migration chain mismatch on {migration.revision}: " f"expected to_version={current_version}."
+                f"Migration chain mismatch on {migration.revision}: "
+                f"expected to_version={current_version}."
             )
 
         logger.info(
@@ -241,7 +279,9 @@ def downgrade_storage(
         )
         payload = migration.downgrade(payload, timezone_name)
         if not isinstance(payload, dict):
-            raise MigrationError(f"Migration {migration.revision} returned non-object payload.")
+            raise MigrationError(
+                f"Migration {migration.revision} returned non-object payload."
+            )
         expected_version = migration.from_version
         actual_version = _detect_schema_version(payload)
         if expected_version == 0 and "schema_version" not in payload:
@@ -266,7 +306,9 @@ def downgrade_storage(
     return True
 
 
-def upgrade_storage_if_needed(path: Path, *, timezone_name: str = DEFAULT_TIMEZONE) -> bool:
+def upgrade_storage_if_needed(
+    path: Path, *, timezone_name: str = DEFAULT_TIMEZONE
+) -> bool:
     """Upgrade storage to latest version only if it is outdated."""
 
     return upgrade_storage(path, timezone_name=timezone_name)

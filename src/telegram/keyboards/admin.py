@@ -11,7 +11,9 @@ class AdminKeyboard:
     """Factory for admin selection keyboards."""
 
     @staticmethod
-    def admins(action: str, admins: tuple[tuple[int, str], ...]) -> InlineKeyboardMarkup:
+    def admins(
+        action: str, admins: tuple[tuple[int, str], ...]
+    ) -> InlineKeyboardMarkup:
         """Build a keyboard with admin labels arranged in two columns."""
 
         keyboard: list[list[InlineKeyboardButton]] = []

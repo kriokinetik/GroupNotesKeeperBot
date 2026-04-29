@@ -53,7 +53,10 @@ class AppDependencies:
 
         for field in fields(self):
             dispatcher[field.name] = getattr(self, field.name)
-        logger.debug("Dependencies registered in dispatcher keys=%s", [field.name for field in fields(self)])
+        logger.debug(
+            "Dependencies registered in dispatcher keys=%s",
+            [field.name for field in fields(self)],
+        )
 
 
 def build_dependencies() -> AppDependencies:

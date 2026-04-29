@@ -32,11 +32,17 @@ class JsonFileStore:
         return StorageData(schema_version=SCHEMA_VERSION)
 
     async def _save(self, data: StorageData) -> None:
-        """Persist storage data by rewriting the target JSON file in place."""
+        """Persist storage data without replacing the mounted file."""
 
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        async with aiofiles.open(self.path, mode="w", encoding="utf-8") as f:
-            await f.write(json.dumps(data.model_dump(mode="json"), ensure_ascii=False, indent=4))
+        payload = json.dumps(data.model_dump(mode="json"), ensure_ascii=False, indent=4)
+        mode = "r+" if self.path.exists() else "w+"
+        async with aiofiles.open(self.path, mode=mode, encoding="utf-8") as f:
+            await f.seek(0)
+            await f.write(payload)
+            await f.write("\n")
+            await f.truncate()
+            await f.flush()
 
     async def _load(self) -> StorageData:
         """Load and validate the JSON storage file."""
@@ -46,7 +52,7 @@ class JsonFileStore:
             await self._save(data)
             return data
 
-        async with aiofiles.open(self.path, encoding="utf-8") as f:
+        async with aiofiles.open(self.path, encoding="utf-8-sig") as f:
             content = await f.read()
             if not content.strip():
                 logger.error("Storage file is empty path=%s", self.path)
@@ -54,7 +60,9 @@ class JsonFileStore:
             try:
                 raw_data = json.loads(content)
             except json.JSONDecodeError:
-                logger.exception("Storage file contains invalid JSON path=%s", self.path)
+                logger.exception(
+                    "Storage file contains invalid JSON path=%s", self.path
+                )
                 raise StorageDataError(str(self.path), "invalid JSON")
 
         if not isinstance(raw_data, dict):

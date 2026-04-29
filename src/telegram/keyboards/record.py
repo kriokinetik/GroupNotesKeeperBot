@@ -9,7 +9,9 @@ class RecordKeyboard:
     """Factory for record history navigation keyboards."""
 
     @staticmethod
-    def navigate(*, is_admin: bool = False, can_navigate: bool = True) -> InlineKeyboardMarkup:
+    def navigate(
+        *, is_admin: bool = False, can_navigate: bool = True
+    ) -> InlineKeyboardMarkup:
         """Build a history navigation keyboard with optional admin actions."""
 
         keyboard = []

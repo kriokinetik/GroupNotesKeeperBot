@@ -86,6 +86,10 @@ msgid "groups_name_empty"
 msgstr "<b>Group name cannot be empty.</b>"
 
 #, python-brace-format
+msgid "groups_name_too_long"
+msgstr "<b>Group name must be {limit} characters or fewer.</b>"
+
+#, python-brace-format
 msgid "groups_already_exists"
 msgstr "Group <b>{group_name}</b> already exists."
 

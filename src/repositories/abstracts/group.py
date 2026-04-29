@@ -17,7 +17,7 @@ class AbstractGroupRepository(ABC):
         """Delete a group by its name."""
 
     @abstractmethod
-    async def get(self, chat_id: CID) -> tuple[str]:
+    async def get(self, chat_id: CID) -> tuple[str, ...]:
         """List all groups in a chat."""
 
     @abstractmethod

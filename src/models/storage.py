@@ -1,14 +1,19 @@
 """Pydantic models describing the persisted JSON storage schema."""
 
 from datetime import datetime as DateTime, timedelta, timezone
+from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class Record(BaseModel):
     """Single note stored inside a group."""
 
-    datetime: DateTime = Field(..., description="Record datetime in ISO 8601 format with timezone offset")
+    model_config = ConfigDict(extra="forbid")
+
+    datetime: DateTime = Field(
+        ..., description="Record datetime in ISO 8601 format with timezone offset"
+    )
     content: str = Field(..., description="Content of the record")
     content_html: str | None = Field(
         default=None,
@@ -45,22 +50,34 @@ class Record(BaseModel):
 class Group(BaseModel):
     """Named collection of records inside a chat."""
 
-    name: str = Field(..., description="Group name")
-    records: list[Record] = Field(default_factory=list, description="Records assigned to this group")
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(..., min_length=1, description="Group name")
+    records: list[Record] = Field(
+        default_factory=list, description="Records assigned to this group"
+    )
 
 
 class ChatData(BaseModel):
     """Per-chat persisted data."""
 
+    model_config = ConfigDict(extra="forbid")
+
     admins: list[str] = Field(
         default_factory=list,
         description="Chat administrators as Telegram user ID strings",
     )
-    groups: list[Group] = Field(default_factory=list, description="Groups available in the chat")
+    groups: list[Group] = Field(
+        default_factory=list, description="Groups available in the chat"
+    )
 
 
 class StorageData(BaseModel):
     """Top-level JSON storage document."""
 
-    schema_version: int = Field(default=1, description="Storage schema version")
-    chats: dict[str, ChatData] = Field(default_factory=dict, description="Chat storage indexed by chat ID")
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: Literal[1] = Field(..., description="Storage schema version")
+    chats: dict[str, ChatData] = Field(
+        default_factory=dict, description="Chat storage indexed by chat ID"
+    )

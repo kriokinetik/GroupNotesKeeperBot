@@ -38,3 +38,14 @@ class GroupLimitExceededError(GroupError):
 
     def __str__(self) -> str:
         return f"Maximum number of groups ({self.limit}) exceeded."
+
+
+class GroupNameTooLongError(GroupError):
+    """Raised when a group name is too long for Telegram UI controls."""
+
+    def __init__(self, limit: int):
+        self.limit = limit
+        super().__init__(limit)
+
+    def __str__(self) -> str:
+        return f"Group name is longer than {self.limit} characters."

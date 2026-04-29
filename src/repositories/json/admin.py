@@ -22,7 +22,9 @@ class AsyncJsonAdminRepository(JsonFileStore, AbstractAdminRepository):
             user_id_str = str(user_id)
 
             if user_id_str in admins:
-                logger.debug("Admin already exists chat_id=%s user_id=%s", chat_id, user_id)
+                logger.debug(
+                    "Admin already exists chat_id=%s user_id=%s", chat_id, user_id
+                )
                 raise AdminAlreadyExistsError(user_id)
 
             admins.append(user_id_str)
@@ -37,7 +39,9 @@ class AsyncJsonAdminRepository(JsonFileStore, AbstractAdminRepository):
             chat_data = self._get_chat(data, chat_id)
 
             if not chat_data:
-                logger.debug("Admin removal failed because chat is missing chat_id=%s", chat_id)
+                logger.debug(
+                    "Admin removal failed because chat is missing chat_id=%s", chat_id
+                )
                 raise ChatNotFoundError(chat_id)
 
             admins = chat_data.admins
@@ -55,14 +59,17 @@ class AsyncJsonAdminRepository(JsonFileStore, AbstractAdminRepository):
             await self._save(data)
             logger.debug("Admin removed chat_id=%s user_id=%s", chat_id, user_id)
 
-    async def get(self, chat_id: CID) -> tuple[UID]:
+    async def get(self, chat_id: CID) -> tuple[UID, ...]:
         """Return all chat admin IDs for the chat."""
 
-        data = await self._load()
+        async with self._lock:
+            data = await self._load()
         chat_data = self._get_chat(data, chat_id)
 
         if not chat_data:
-            logger.debug("Admin lookup failed because chat is missing chat_id=%s", chat_id)
+            logger.debug(
+                "Admin lookup failed because chat is missing chat_id=%s", chat_id
+            )
             raise ChatNotFoundError(chat_id)
 
         return tuple(int(admin_id) for admin_id in chat_data.admins)

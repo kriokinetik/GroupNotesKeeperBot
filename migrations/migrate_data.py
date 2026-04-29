@@ -19,7 +19,9 @@ def _parse_tag_list(raw: str | None) -> set[str] | None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run JSON storage migrations (upgrade/downgrade).")
+    parser = argparse.ArgumentParser(
+        description="Run JSON storage migrations (upgrade/downgrade)."
+    )
     parser.add_argument(
         "command",
         choices=("upgrade", "downgrade"),
